@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -22,7 +23,6 @@ import java.util.concurrent.atomic.LongAdder;
  * description 获取全部文档
  * create 2021-04-22 14:24
  **/
-@Component
 public class ScanController implements ApplicationContextAware {
     private ApplicationContext applicationContext;
     private LongAdder index = new LongAdder();

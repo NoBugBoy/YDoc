@@ -18,17 +18,63 @@ import java.util.*;
 public class RequestTypeMatchingSwagger {
     public static JSONObject matching(JSONObject json,Method method, String outPath,String tag){
         if(method.isAnnotationPresent(GetMapping.class)){
-            return get(json,method,outPath,tag);
+            GetMapping getMapping = method.getAnnotation(GetMapping.class);
+            String path = "";
+            if(getMapping.value().length > 0){
+                //base拼接restfulApi的路径
+                path = getMapping.value()[0];
+            }
+            return get(getMapping.name(),path,json,method,outPath,tag);
         }else if(method.isAnnotationPresent(PostMapping.class)){
-            return post(json,method,outPath,tag);
+            PostMapping annotation = method.getAnnotation(PostMapping.class);
+            String path = "";
+            if(annotation.value().length > 0){
+                //base拼接restfulApi的路径
+                path = annotation.value()[0];
+            }
+            return post(annotation.name(),path,json,method,outPath,tag);
         }else if(method.isAnnotationPresent(PutMapping.class)){
-            return put(json,method,outPath,tag);
+            PutMapping annotation = method.getAnnotation(PutMapping.class);
+            String path = "";
+            if(annotation.value().length > 0){
+                //base拼接restfulApi的路径
+                path = annotation.value()[0];
+            }
+            return put(annotation.name(),path,json,method,outPath,tag);
         }else if(method.isAnnotationPresent(DeleteMapping.class)){
-            return delete(json,method,outPath,tag);
-        }else{
+            DeleteMapping annotation = method.getAnnotation(DeleteMapping.class);
+            String path = "";
+            if(annotation.value().length > 0){
+                //base拼接restfulApi的路径
+                path = annotation.value()[0];
+            }
+            return delete(annotation.name(),path,json,method,outPath,tag);
+        }else if(method.isAnnotationPresent(RequestMapping.class)){
+            RequestMapping annotation = method.getAnnotation(RequestMapping.class);
+            RequestMethod requestMethod = null;
+            if(annotation.method().length > 0){
+                requestMethod = annotation.method()[0];
+            }
+            String path = "";
+            if(annotation.value().length > 0){
+                //base拼接restfulApi的路径
+                path = annotation.value()[0];
+            }
+            if(requestMethod != null){
+                switch (requestMethod){
+                    case GET: return get(requestMethod.name(),path,json,method,outPath,tag);
+                    case PUT:return put(requestMethod.name(),path,json,method,outPath,tag);
+                    case POST:return post(requestMethod.name(),path,json,method,outPath,tag);
+                    case DELETE:return delete(requestMethod.name(),path,json,method,outPath,tag);
+                    default:
+                        return Factory.get();
+                }
+            }
+        }else {
             //nothing
             return new JSONObject();
         }
+        return Factory.get();
     }
     public static void returnBuild(Method method, JSONObject json){
         JSONObject res = Factory.get();
@@ -89,13 +135,7 @@ public class RequestTypeMatchingSwagger {
     }
 
 
-    private static JSONObject get(JSONObject api,Method method, String outPath,String tag){
-        GetMapping getMapping = method.getAnnotation(GetMapping.class);
-        String path = "";
-        if(getMapping.value().length > 0){
-            //base拼接restfulApi的路径
-            path = getMapping.value()[0];
-        }
+    private static JSONObject get(String name,String path,JSONObject api,Method method, String outPath,String tag){
         //方法对象
         JSONObject apiMethod = Factory.get();
         api.put(outPath + path,apiMethod);
@@ -103,8 +143,8 @@ public class RequestTypeMatchingSwagger {
         JSONObject content = Factory.get();
         apiMethod.put("get",content);
         //restfulApi接口的描述/功能
-        content.put("summary",getMapping.name());
-        content.put("description",getMapping.name());
+        content.put("summary",name);
+        content.put("description",name);
         //处理get参数 1.如果不是pojo则必须带上@RequestParam用来获取参数描述信息
         List<JSONObject> parametersJson = new ArrayList<>();
         content.put("parameters",parametersJson);
@@ -176,13 +216,7 @@ public class RequestTypeMatchingSwagger {
         }
         return api;
     }
-    private static JSONObject post(JSONObject api,Method method, String outPath,String tag){
-        PostMapping annotation = method.getAnnotation(PostMapping.class);
-        String path = "";
-        if(annotation.value().length > 0){
-            //base拼接restfulApi的路径
-            path = annotation.value()[0];
-        }
+    private static JSONObject post(String name,String path,JSONObject api,Method method, String outPath,String tag){
         //方法对象
         JSONObject apiMethod = Factory.get();
         api.put(outPath + path,apiMethod);
@@ -191,8 +225,8 @@ public class RequestTypeMatchingSwagger {
         apiMethod.put("post",content);
         content.put("tags",Collections.singletonList(tag));
         //restfulApi接口的描述/功能
-        content.put("summary",annotation.name());
-        content.put("description",annotation.name());
+        content.put("summary",name);
+        content.put("description",name);
         content.put("consumes", Collections.singleton("application/json"));
         //处理get参数 1.如果不是pojo则必须带上@RequestParam用来获取参数描述信息
         List<JSONObject> parametersJson = new ArrayList<>();
@@ -202,13 +236,7 @@ public class RequestTypeMatchingSwagger {
         baseRequestBody(method.getParameters(),parametersJson);
         return api;
     }
-    private static JSONObject delete(JSONObject api,Method method, String outPath,String tag){
-        PostMapping annotation = method.getAnnotation(PostMapping.class);
-        String path = "";
-        if(annotation.value().length > 0){
-            //base拼接restfulApi的路径
-            path = annotation.value()[0];
-        }
+    private static JSONObject delete(String name,String path,JSONObject api,Method method, String outPath,String tag){
         //方法对象
         JSONObject apiMethod = Factory.get();
         api.put(outPath + path,apiMethod);
@@ -217,8 +245,8 @@ public class RequestTypeMatchingSwagger {
         apiMethod.put("delete",content);
         content.put("tags",Collections.singletonList(tag));
         //restfulApi接口的描述/功能
-        content.put("summary",annotation.name());
-        content.put("description",annotation.name());
+        content.put("summary",name);
+        content.put("description",name);
         content.put("consumes", Collections.singleton("application/json"));
         //处理get参数 1.如果不是pojo则必须带上@RequestParam用来获取参数描述信息
         List<JSONObject> parametersJson = new ArrayList<>();
@@ -228,13 +256,7 @@ public class RequestTypeMatchingSwagger {
         baseRequestBody(method.getParameters(),parametersJson);
         return api;
     }
-    private static JSONObject put(JSONObject api,Method method, String outPath,String tag){
-        PostMapping annotation = method.getAnnotation(PostMapping.class);
-        String path = "";
-        if(annotation.value().length > 0){
-            //base拼接restfulApi的路径
-            path = annotation.value()[0];
-        }
+    private static JSONObject put(String name,String path,JSONObject api,Method method, String outPath,String tag){
         //方法对象
         JSONObject apiMethod = Factory.get();
         api.put(outPath + path,apiMethod);
@@ -243,8 +265,8 @@ public class RequestTypeMatchingSwagger {
         apiMethod.put("put",content);
         content.put("tags",Collections.singletonList(tag));
         //restfulApi接口的描述/功能
-        content.put("summary",annotation.name());
-        content.put("description",annotation.name());
+        content.put("summary",name);
+        content.put("description",name);
         content.put("consumes", Collections.singleton("application/json"));
         //处理get参数 1.如果不是pojo则必须带上@RequestParam用来获取参数描述信息
         List<JSONObject> parametersJson = new ArrayList<>();
@@ -306,7 +328,7 @@ public class RequestTypeMatchingSwagger {
                 jsonArray.add(enumConstant.toString());
             }
             json.put("description",jsonArray);
-             return json;
+            return json;
         }
         if(declaredField.getType().equals(List.class) || declaredField.getType().equals(Set.class)){
             Type              genericType = declaredField.getGenericType();

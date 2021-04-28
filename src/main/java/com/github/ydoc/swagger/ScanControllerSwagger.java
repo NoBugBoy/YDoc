@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +35,7 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
     YDocPropertiesConfig propertiesConfig;
     private ApplicationContext applicationContext;
     private Environment e;
+    @PostConstruct
     public void scan(){
         Map<String, Object> restControllerMap = applicationContext.getBeansWithAnnotation(RestController.class);
         Swagger swagger = Swagger.initialize();
@@ -45,7 +47,7 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
             Class<?> aClass = object.getValue().getClass();
             //如果有外层路径需要加上
             String outPath = buildBaseUrl(aClass);
-            if(!outPath.startsWith("/")){
+            if(StringUtils.hasText(outPath) && !outPath.startsWith("/")){
                 continue;
             }
             //controller分组
