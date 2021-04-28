@@ -35,7 +35,6 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
     YDocPropertiesConfig propertiesConfig;
     private ApplicationContext applicationContext;
     private Environment e;
-    @PostConstruct
     public void scan(){
         Map<String, Object> restControllerMap = applicationContext.getBeansWithAnnotation(RestController.class);
         Swagger swagger = Swagger.initialize();

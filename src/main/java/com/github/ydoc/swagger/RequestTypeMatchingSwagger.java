@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.ydoc.anno.ParamDesc;
 import com.github.ydoc.anno.ParamIgnore;
 import com.github.ydoc.yapi.RequestBodyType;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.*;
@@ -171,7 +172,7 @@ public class RequestTypeMatchingSwagger {
                 PathVariable annotation = parameterType.getAnnotation(PathVariable.class);
                 paramName = annotation.value();
                 required = Boolean.TRUE;
-                paramDesc = "1";
+                paramDesc = StringUtils.hasText(annotation.name())?annotation.name():"path参数";
                 paramType = "string";
                 in = "path";
             } else if(parameterType.isAnnotationPresent(RequestParam.class)){
@@ -285,7 +286,7 @@ public class RequestTypeMatchingSwagger {
                 api.put("name",annotation.value());
                 api.put("in","path");
                 api.put("required",Boolean.TRUE);
-                api.put("description","1");
+                api.put("description",StringUtils.hasText(annotation.name())?annotation.name():"path参数");
                 api.put("type","string");
                 list.add(api);
             }else if(parameter.isAnnotationPresent(RequestBody.class)){

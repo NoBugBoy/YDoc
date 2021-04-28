@@ -1,4 +1,5 @@
-# YDoc
+# SpringBoot-YApi文档生成器
+### [YDoc源码Github仓库地址](https://github.com/NoBugBoy/YDoc)
 # 引言
 每当工程需要接口文档时，总会使用Swagger一类的restfulApi文档生成工具，相信很多人在使用时都会被它的一些注解和配置恶心到，如果工程对代码规范无要求还能作为注释来看，如果需要再写Javadoc注释就无形中增加了工作量，为了更加简单的使用我写了一款基于spring-boot-starter的依赖库，它基于YApi平台可以统一管理api文档和权限控制，mock数据等
 
@@ -57,19 +58,23 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，无Ui界面，�
 
 | 注解 | 值 |
 |--|--|
-| @RestController | 注解中value标识该controller的作用，默认为controller名 |
-| @RequestMapping |注解中name标识该api的作用，在类上加跟路径时不需要name |
-| @RequestParam |注解中name标识该参数的作用 |
-| @GetMapping | 注解中name标识该api的作用 |
-| @PostMapping | 注解中name标识该api的作用 |
-| @DeleteMapping | 注解中name标识该api的作用 |
-| @PutMapping | 注解中name标识该api的作用 |
-| @ParamDesc| 注解中value标识该参数的描述，required是否必须 |
+| @RestController | 注解中value描述controller的作用，默认为controller名 |
+| @RequestMapping |注解中name描述该api的作用，在类上加跟路径时不需要name |
+| @RequestParam |注解中name描述该参数的作用 |
+|@PathVariable|注解中name描述该参数的作用 |
+| @GetMapping | 注解中name描述该api的作用 |
+| @PostMapping | 注解中name描述该api的作用 |
+| @DeleteMapping | 注解中name描述该api的作用 |
+| @PutMapping | 注解中name描述该api的作用 |
+| @ParamDesc| 注解中value描述该参数的描述，required是否必须 |
 | @ParamIgnore| 忽略参数 |
 
 
-其中@ParamDesc与@ParamIgnore为额外的注解，其余为SpringBoot的注解，@ParamDesc用来标识实体中参数的描述，@ParamIgnore用来忽略参数不参与生成文档。
+其中@ParamDesc与@ParamIgnore为额外的注解，其余为SpringBoot的注解，@ParamDesc用来标识实体中参数的描述，@ParamIgnore用来忽略参数不参与生成文档，如不加参数描述则默认为参数的名称。
 
+
+### 5.画外音
+参数描述的注解是逼不得已。后续会考虑加入@valid相关的处理，从中考虑是否可以"见缝插针"
 
 
 
