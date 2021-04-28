@@ -5,9 +5,9 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * @author yujian
- * @description
- * @create 2021-04-22 14:46
+ * author yujian
+ * description
+ * create 2021-04-22 14:46
  **/
 
 @Getter

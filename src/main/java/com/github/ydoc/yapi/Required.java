@@ -3,7 +3,7 @@ package com.github.ydoc.yapi;
 import lombok.Getter;
 
 /**
- * @author yujian
+ * author yujian
  */
 
 public enum Required {

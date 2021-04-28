@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author yujian
- * @description 获取全部文档
- * @create 2021-04-22 14:24
+ * author yujian
+ * description 获取全部文档
+ * create 2021-04-22 14:24
  **/
 @Component
 @EnableConfigurationProperties(YDocPropertiesConfig.class)
@@ -71,11 +71,7 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
-
-    /**
-     * 拼接baseurl
-     * @param aClass controller class
-     */
+    
     public String buildBaseUrl(Class<?> aClass){
         String basePath = "";
         if(aClass.isAnnotationPresent(RequestMapping.class)){

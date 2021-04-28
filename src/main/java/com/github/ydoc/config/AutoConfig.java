@@ -7,9 +7,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @author yujian
- * @description
- * @create 2021-04-22 14:22
+ * author yujian
+ * description
+ * create 2021-04-22 14:22
  **/
 @Configuration
 @EnableConfigurationProperties(YDocPropertiesConfig.class)

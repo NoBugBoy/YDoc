@@ -6,9 +6,9 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * @author yujian
- * @description 导入的json实体
- * @create 2021-04-23 15:43
+ * author yujian
+ * description 导入的json实体
+ * create 2021-04-23 15:43
  **/
 @Data
 public class Yapi {

@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * @author yujian
+ * author yujian
  */
 @SpringBootApplication
 public class AutomaticGenerationApplication {

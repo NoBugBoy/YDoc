@@ -9,9 +9,9 @@ import org.springframework.web.client.RestTemplate;
 
 
 /**
- * @author yujian
- * @description
- * @create 2021-04-28 12:04
+ * author yujian
+ * description
+ * create 2021-04-28 12:04
  **/
 public class YapiApi {
     public static void importDoc(String token,String host,String json){

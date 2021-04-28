@@ -3,9 +3,9 @@ package com.github.ydoc.yapi;
 import java.util.UUID;
 
 /**
- * @author yujian
- * @description
- * @create 2021-04-23 17:57
+ * author yujian
+ * description
+ * create 2021-04-23 17:57
  **/
 public class IdAuto {
     public static String get(){

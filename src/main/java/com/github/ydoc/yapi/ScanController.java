@@ -18,9 +18,9 @@ import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
 
 /**
- * @author yujian
- * @description 获取全部文档
- * @create 2021-04-22 14:24
+ * author yujian
+ * description 获取全部文档
+ * create 2021-04-22 14:24
  **/
 @Component
 public class ScanController implements ApplicationContextAware {

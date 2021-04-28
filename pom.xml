@@ -8,11 +8,49 @@
         <version>2.4.5</version>
         <relativePath/>
     </parent>
-    <groupId>com.github</groupId>
+    <groupId>com.github.nobugboy</groupId>
     <artifactId>ydoc-spring-boot-starter</artifactId>
     <version>1.0.0</version>
     <name>AutomaticGenerationYApiDoc</name>
+    <packaging>jar</packaging>
     <description>自动生成yapi文档</description>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <connection>scm:git:git@github.com:NoBugBoy/YDoc.git</connection>
+        <developerConnection>scm:git:git@github.com:NoBugBoy/YDoc.git</developerConnection>
+        <url>git@github.com:NoBugBoy/YDoc.git</url>
+    </scm>
+    <profiles>
+        <profile>
+            <id>release</id>
+            <properties>
+                <profiles.active>release</profiles.active>
+            </properties>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+                </snapshotRepository>
+                <repository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+    </profiles>
+    <developers>
+        <developer>
+            <name>yujian</name>
+            <email>daydaynotbug@163.com</email>
+            <url>https://github.com/NoBugBoy/</url>
+        </developer>
+    </developers>
     <properties>
         <java.version>1.8</java.version>
     </properties>
@@ -57,12 +95,49 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.4</version>
                 <configuration>
-                    <skip>true</skip>
+                    <encoding>UTF-8</encoding>
+                    <aggregate>true</aggregate>
+                    <charset>UTF-8</charset>
+                    <docencoding>UTF-8</docencoding>
                 </configuration>
-
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

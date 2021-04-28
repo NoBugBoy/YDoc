@@ -10,9 +10,9 @@ import java.lang.reflect.*;
 import java.util.*;
 
 /**
- * @author yujian
- * @description 匹配方法类型
- * @create 2021-04-23 12:25
+ * author yujian
+ * description 匹配方法类型
+ * create 2021-04-23 12:25
  **/
 
 public class RequestTypeMatchingSwagger {

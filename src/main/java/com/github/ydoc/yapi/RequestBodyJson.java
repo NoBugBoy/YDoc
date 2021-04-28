@@ -6,9 +6,9 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @author yujian
- * @description post put delete 请求参数json
- * @create 2021-04-23 18:01
+ * author yujian
+ * description post put delete 请求参数json
+ * create 2021-04-23 18:01
  **/
 @Data
 public class RequestBodyJson {

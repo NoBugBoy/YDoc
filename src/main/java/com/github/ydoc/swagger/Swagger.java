@@ -9,9 +9,9 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * @author yujian
- * @description
- * @create 2021-04-27 09:50
+ * author yujian
+ * description
+ * create 2021-04-27 09:50
  **/
 @Getter
 @Setter
