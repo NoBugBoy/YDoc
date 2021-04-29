@@ -1,5 +1,6 @@
 package com.github.ydoc.swagger;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ydoc.anno.ParamDesc;
 import com.github.ydoc.anno.ParamIgnore;
@@ -111,6 +112,10 @@ public class RequestTypeMatchingSwagger {
                         try {
                             Class<?> clazz = Class.forName(actualTypeArgument.getTypeName());
                             for (Field declaredField : clazz.getDeclaredFields()) {
+                                if(Modifier.isFinal(declaredField.getModifiers())){
+                                    //final不处理
+                                    continue;
+                                }
                                 properties.put(declaredField.getName(), deepObject(Factory.get(),declaredField));
                             }
                             schema.put("properties",properties);
@@ -191,6 +196,10 @@ public class RequestTypeMatchingSwagger {
                     isObject = Boolean.TRUE;
                     Field[] declaredFields = parameterType.getType().getDeclaredFields();
                     for (Field field : declaredFields) {
+                        if(Modifier.isFinal(field.getModifiers())){
+                            //final不处理
+                            continue;
+                        }
                         JSONObject bodyField = Factory.get();
                         bodyField.put("name",field.getName());
                         bodyField.put("in","query");
@@ -323,13 +332,13 @@ public class RequestTypeMatchingSwagger {
         }
         if(declaredField.getType().isEnum()){
             //常规类型
-            json.put("type","enum");
+            json.put("type","string");
             Object[] enumConstants = declaredField.getType().getEnumConstants();
             Set<String> jsonArray = new HashSet<>();
             for (Object enumConstant : enumConstants) {
                 jsonArray.add(enumConstant.toString());
             }
-            json.put("description",jsonArray);
+            json.put("description", JSON.toJSONString(jsonArray));
             return json;
         }
         if(declaredField.getType().equals(List.class) || declaredField.getType().equals(Set.class)){
@@ -349,6 +358,10 @@ public class RequestTypeMatchingSwagger {
                 jsonObject.put("type",RequestBodyType.OBJECT.type);
                 JSONObject filedObject = Factory.get();
                 for (Field field : actualTypeArgument.getDeclaredFields()) {
+                    if(Modifier.isFinal(field.getModifiers())){
+                        //final不处理
+                        continue;
+                    }
                     if(field.getType().equals(declaredField.getType())){
                         // User 里有 list<User> 会死递归
                         break;
