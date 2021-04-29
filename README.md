@@ -28,6 +28,7 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，无Ui界面，�
 1. 需搭建YApi文档平台（[Yapi官方文档](https://hellosean1025.github.io/yapi/devops/index.html)）
 2. 引用ydoc-spring-boot-starter依赖
 3. 在配置文件中配置YApi的url，以及项目的token
+4. 如果不能直接依赖说明还没有同步到中央maven仓库过几天应该就可以了
 
 
 
@@ -71,9 +72,16 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，无Ui界面，�
 
 
 其中@ParamDesc与@ParamIgnore为额外的注解，其余为SpringBoot的注解，@ParamDesc用来标识实体中参数的描述，@ParamIgnore用来忽略参数不参与生成文档，如不加参数描述则默认为参数的名称。
+**针对enum类型，需要重新toString方法,返回一个json字符串作为描述参数**。
+
+### 5.使用YDoc规范建议
+1. 无论是什么请求，如果使用对象接收对象内的基本类型建议使用包装类
+2. 建议在参数上加@ParamDesc用来描述作用
+3. spring提供的注解再原有开发习惯上加name，用来描述RestController或Api的作用
+4. 如有特殊参数例如Bindingresult，登录的用户实体等使用@ParamIgnore进行忽略
 
 
-### 5.画外音
+### 6.话外音
 参数描述的注解是逼不得已。后续会考虑加入@valid相关的处理，从中考虑是否可以"见缝插针"
 
 
