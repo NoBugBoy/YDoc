@@ -8,6 +8,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.*;
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -100,7 +101,7 @@ public class RequestTypeMatchingSwagger {
             if (genericReturnType instanceof ParameterizedType){
                 ParameterizedType genericReturnType1 = (ParameterizedType)genericReturnType;
                 for (Type actualTypeArgument : genericReturnType1.getActualTypeArguments()) {
-                    if(actualTypeArgument.getTypeName().startsWith("java")){
+                    if(checkJavaType(actualTypeArgument.getTypeName())){
                         JSONObject jsonObject = Factory.get();
                         properties.put(actualTypeArgument.getTypeName(),jsonObject);
                         jsonObject.put("description",desc);
@@ -120,7 +121,7 @@ public class RequestTypeMatchingSwagger {
                 }
             }
         }
-        else if(returnType.getName().startsWith("java")){
+        else if(checkJavaType(returnType.getName())){
             JSONObject jsonObject = Factory.get();
             properties.put(returnType.getSimpleName(),jsonObject);
             jsonObject.put("description",desc);
@@ -186,7 +187,7 @@ public class RequestTypeMatchingSwagger {
                     continue;
                 }
                 //2 参数无注解则有可能没加，或是pojo只获取第一层的参数
-                if(!parameterType.getParameterizedType().getTypeName().startsWith("java")){
+                if(!checkJavaType(parameterType.getParameterizedType().getTypeName())){
                     isObject = Boolean.TRUE;
                     Field[] declaredFields = parameterType.getType().getDeclaredFields();
                     for (Field field : declaredFields) {
@@ -336,7 +337,7 @@ public class RequestTypeMatchingSwagger {
             ParameterizedType pt          = (ParameterizedType) genericType;
             Class<?>          actualTypeArgument = (Class<?>)pt.getActualTypeArguments()[0];
             json.put("type",RequestBodyType.ARRAY.type);
-            if(actualTypeArgument.getTypeName().startsWith("java")){
+            if(checkJavaType(actualTypeArgument.getTypeName())){
                 //如果是普通类型
                 JSONObject jsonObject = Factory.get();
                 jsonObject.put("type",RequestBodyType.of(actualTypeArgument.getSimpleName()).type);
@@ -362,7 +363,7 @@ public class RequestTypeMatchingSwagger {
             }
             return json;
         }
-        else if(declaredField.getType().getTypeName().startsWith("java")){
+        else if(checkJavaType(declaredField.getType().getTypeName())){
             //常规类型
             json.put("type",RequestBodyType.of(declaredField.getType().getSimpleName()).type);
             json.put("description",desc);
@@ -380,5 +381,27 @@ public class RequestTypeMatchingSwagger {
             return json;
         }
 
+    }
+
+    /**
+     * 解决如果不是包装类型不是java开头的问题
+     * @param name className
+     * @return boolean
+     */
+    static boolean checkJavaType(String name){
+        if(name.startsWith("java")){
+            return true;
+        }
+        switch (name.toLowerCase()){
+            case "int" :
+            case "long":
+            case "short":
+            case "double":
+            case "float":
+            case "byte":
+            case "char":
+            case "boolean": return true;
+        }
+        return false;
     }
 }

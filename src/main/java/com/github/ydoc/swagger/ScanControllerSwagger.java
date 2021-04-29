@@ -28,7 +28,6 @@ import java.util.Map;
  * description 获取全部文档
  * create 2021-04-22 14:24
  **/
-@Component
 @EnableConfigurationProperties(YDocPropertiesConfig.class)
 public class ScanControllerSwagger implements ApplicationContextAware, EnvironmentAware, InitializingBean {
     @Autowired
@@ -92,6 +91,7 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
     @Override
     public void afterPropertiesSet() throws Exception {
         if(propertiesConfig.isEnable()){
+            System.out.println(" >>> YDoc Sync Api start !<<<");
             scan();
             System.out.println(" >>> YDoc Sync Api Successful !<<<");
         }

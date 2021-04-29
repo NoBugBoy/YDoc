@@ -26,9 +26,9 @@ public class Swagger {
     @Getter
     @Setter
     public static class Info{
-        private String title = "阿斯达";
+        private String title = "YDoc";
         private String version = "last";
-        private String description ="测试工程";
+        private String description ="YDoc生成的Api文档";
     }
     @Getter
     @Setter
