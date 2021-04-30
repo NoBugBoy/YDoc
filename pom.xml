@@ -10,8 +10,8 @@
     </parent>
     <groupId>com.github.nobugboy</groupId>
     <artifactId>ydoc-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
-    <name>AutomaticGenerationYApiDoc</name>
+    <version>1.0.1</version>
+    <name>ydoc-spring-boot-starter</name>
     <packaging>jar</packaging>
     <description>自动生成yapi文档</description>
     <licenses>
