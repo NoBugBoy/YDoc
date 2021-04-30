@@ -107,7 +107,7 @@ public class RequestTypeMatchingSwagger {
                         JSONObject jsonObject = Factory.get();
                         properties.put(actualTypeArgument.getTypeName(),jsonObject);
                         jsonObject.put("description",desc);
-                        jsonObject.put("type",RequestBodyType.of(actualTypeArgument.getTypeName()));
+                        jsonObject.put("type",RequestBodyType.of(actualTypeArgument.getTypeName()).type);
                         schema.put("properties",properties);
                     }else{
                         try {
@@ -128,10 +128,11 @@ public class RequestTypeMatchingSwagger {
             }
         }
         else if(checkJavaType(returnType.getName())){
+            schema.put("type",RequestBodyType.of(returnType.getSimpleName()).type);
             JSONObject jsonObject = Factory.get();
             properties.put(returnType.getSimpleName(),jsonObject);
             jsonObject.put("description",desc);
-            jsonObject.put("type",RequestBodyType.of(returnType.getSimpleName()));
+            jsonObject.put("type",RequestBodyType.of(returnType.getSimpleName()).type);
             schema.put("properties",properties);
         }else{
             for (Field declaredField : returnType.getDeclaredFields()) {
@@ -204,7 +205,7 @@ public class RequestTypeMatchingSwagger {
                         JSONObject bodyField = Factory.get();
                         bodyField.put("name",field.getName());
                         bodyField.put("in","query");
-                        bodyField.put("type",RequestBodyType.of(field.getType().getSimpleName()));
+                        bodyField.put("type",RequestBodyType.of(field.getType().getSimpleName()).type);
                         if(field.isAnnotationPresent(ParamDesc.class)){
                             ParamDesc annotation = field.getAnnotation(ParamDesc.class);
                             bodyField.put("required",annotation.required());
@@ -222,7 +223,7 @@ public class RequestTypeMatchingSwagger {
                 param.put("in",in);
                 param.put("required",required);
                 param.put("description",paramDesc);
-                param.put("type",RequestBodyType.of(paramType));
+                param.put("type",RequestBodyType.of(paramType).type);
                 parametersJson.add(param);
             }
         }

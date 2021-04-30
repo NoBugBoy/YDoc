@@ -215,7 +215,7 @@ public class RequestTypeMatching {
             if(actualTypeArgument.getTypeName().startsWith("java")){
                 //如果是普通类型
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("type",RequestBodyType.of(actualTypeArgument.getSimpleName()).type);
+                jsonObject.put("type",RequestBodyType.of(actualTypeArgument.getSimpleName()));
                 jsonObject.put("description",desc);
                 json.put("items",jsonObject);
             }else{
@@ -240,7 +240,7 @@ public class RequestTypeMatching {
         }
         else if(declaredField.getType().getTypeName().startsWith("java")){
             //常规类型
-            json.put("type",RequestBodyType.of(declaredField.getType().getSimpleName()).type);
+            json.put("type",RequestBodyType.of(declaredField.getType().getSimpleName()));
             json.put("description",desc);
             return json;
         }else{
