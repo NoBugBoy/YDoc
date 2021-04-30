@@ -332,7 +332,7 @@ public class RequestTypeMatchingSwagger {
         }
         if(declaredField.getType().isEnum()){
             //常规类型
-            json.put("type","string");
+            json.put("type","integer");
             Object[] enumConstants = declaredField.getType().getEnumConstants();
             Set<String> jsonArray = new HashSet<>();
             for (Object enumConstant : enumConstants) {

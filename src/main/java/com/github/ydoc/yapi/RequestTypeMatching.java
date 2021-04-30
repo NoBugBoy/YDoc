@@ -203,7 +203,7 @@ public class RequestTypeMatching {
         if(declaredField.getType().isEnum()){
             //// TODO: 2021/4/26
             //常规类型
-            json.put("type","string");
+            json.put("type","integer");
             json.put("description",desc);
             return json;
         }

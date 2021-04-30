@@ -46,6 +46,15 @@ public enum RequestBodyType {
                 return value;
             }
         }
+        switch (low.toLowerCase()){
+            case "long" :
+            case "short" :
+            case "double" :
+            case "float" :
+            case "bigdecimal" : return NUMBER;
+            default:
+        }
+
         return OBJECT;
     }
 }
