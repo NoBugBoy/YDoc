@@ -98,6 +98,7 @@ public class RequestTypeMatchingSwagger {
             desc = annotation.value();
         }
         if(returnType.equals(List.class) || returnType.equals(Set.class)) {
+            schema.put("type","array");
             Type genericReturnType = method.getGenericReturnType();
             if (genericReturnType instanceof ParameterizedType){
                 ParameterizedType genericReturnType1 = (ParameterizedType)genericReturnType;
@@ -106,7 +107,7 @@ public class RequestTypeMatchingSwagger {
                         JSONObject jsonObject = Factory.get();
                         properties.put(actualTypeArgument.getTypeName(),jsonObject);
                         jsonObject.put("description",desc);
-                        jsonObject.put("type",actualTypeArgument.getTypeName());
+                        jsonObject.put("type",RequestBodyType.of(actualTypeArgument.getTypeName()));
                         schema.put("properties",properties);
                     }else{
                         try {
@@ -130,7 +131,7 @@ public class RequestTypeMatchingSwagger {
             JSONObject jsonObject = Factory.get();
             properties.put(returnType.getSimpleName(),jsonObject);
             jsonObject.put("description",desc);
-            jsonObject.put("type",returnType.getSimpleName());
+            jsonObject.put("type",RequestBodyType.of(returnType.getSimpleName()));
             schema.put("properties",properties);
         }else{
             for (Field declaredField : returnType.getDeclaredFields()) {
@@ -203,7 +204,7 @@ public class RequestTypeMatchingSwagger {
                         JSONObject bodyField = Factory.get();
                         bodyField.put("name",field.getName());
                         bodyField.put("in","query");
-                        bodyField.put("type",field.getType().getSimpleName());
+                        bodyField.put("type",RequestBodyType.of(field.getType().getSimpleName()));
                         if(field.isAnnotationPresent(ParamDesc.class)){
                             ParamDesc annotation = field.getAnnotation(ParamDesc.class);
                             bodyField.put("required",annotation.required());
@@ -221,7 +222,7 @@ public class RequestTypeMatchingSwagger {
                 param.put("in",in);
                 param.put("required",required);
                 param.put("description",paramDesc);
-                param.put("type",paramType);
+                param.put("type",RequestBodyType.of(paramType));
                 parametersJson.add(param);
             }
         }
