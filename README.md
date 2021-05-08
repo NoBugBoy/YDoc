@@ -73,7 +73,8 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，无Ui界面，�
 
 
 其中@ParamDesc与@ParamIgnore为额外的注解，其余为SpringBoot的注解，@ParamDesc用来标识实体中参数的描述，@ParamIgnore用来忽略参数不参与生成文档，如不加参数描述则默认为参数的名称。
-**针对enum类型，需要重写enum的toString()方法,返回一个字符串作为描述参数() **。
+
+** 针对enum类型，需要重写enum的toString()方法,返回一个字符串作为描述参数() **
 
 ### 5.使用YDoc规范建议
 1. 无论是什么请求，如果使用对象接收对象内的基本类型建议使用包装类
