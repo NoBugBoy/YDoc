@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
  * create 2021-04-27 10:30
  **/
 public class Factory {
+    public static String json;
     public static JSONObject get(){
         return new JSONObject();
     }

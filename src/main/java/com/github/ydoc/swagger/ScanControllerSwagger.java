@@ -43,7 +43,7 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
             Class<?> aClass = object.getValue().getClass();
             //如果有外层路径需要加上
             String outPath = buildBaseUrl(aClass);
-            if(StringUtils.hasText(outPath) && !outPath.startsWith("/")){
+            if(StringUtils.hasText(outPath) && !outPath.startsWith("/") || "/swagger-json".equals(outPath)){
                 continue;
             }
             //controller分组
@@ -58,10 +58,14 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
         swagger.setPaths(paths);
         swagger.setTags(tags);
         String json = JSON.toJSONString(swagger);
+        Factory.json = json;
         if(propertiesConfig.isPrint()){
             System.out.println(json);
         }
-        YapiApi.importDoc(propertiesConfig.getToken(),propertiesConfig.getHost(),json);
+        if(StringUtils.hasText(propertiesConfig.getHost()) && StringUtils.hasText(propertiesConfig.getToken())){
+            YapiApi.importDoc(propertiesConfig.getToken(),propertiesConfig.getHost(),json);
+        }
+
 
     }
 
