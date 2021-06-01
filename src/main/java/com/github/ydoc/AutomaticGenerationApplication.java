@@ -31,7 +31,6 @@ public class AutomaticGenerationApplication {
     private UiConfiguration        uiConfiguration;
     @Autowired
     private SwaggerResourcesConfig swaggerResourcesConfig;
-
     @GetMapping("/configuration/security")
     public  ResponseEntity<SecurityConfiguration> security(){
         if(securityConfiguration!=null){
