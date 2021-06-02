@@ -388,8 +388,8 @@ public class RequestTypeMatchingSwagger {
             json.put("description",desc);
             return json;
         }else{
-            //对象 先解析desc
-            Class<?> declaringClass = declaredField.getDeclaringClass();
+            //修复 https://github.com/NoBugBoy/YDoc/issues/1
+            Class<?> declaringClass = declaredField.getType();
             json.put("type",RequestBodyType.OBJECT.type);
             JSONObject objectTypeJSON = Factory.get();
             for (Field field : declaringClass.getDeclaredFields()) {
