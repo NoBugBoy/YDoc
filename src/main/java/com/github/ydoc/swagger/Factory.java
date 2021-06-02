@@ -12,4 +12,5 @@ public class Factory {
     public static JSONObject get(){
         return new JSONObject();
     }
+    public static JSONObject definitions = new JSONObject();
 }

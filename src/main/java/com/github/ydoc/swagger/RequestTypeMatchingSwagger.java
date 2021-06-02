@@ -9,7 +9,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.*;
-import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -310,9 +309,14 @@ public class RequestTypeMatchingSwagger {
                 JSONObject schema = Factory.get();
                 api.put("schema",schema);
                 schema.put("type","object");
-                schema.put("title","YDoc");
+                schema.put("title",type.getSimpleName());
                 JSONObject properties = Factory.get();
                 schema.put("properties",properties);
+                schema.put("$ref","#/definitions/"+type.getSimpleName());
+                //
+                JSONObject clone = (JSONObject)schema.clone();
+                clone.remove("$ref");
+                Factory.definitions.put(type.getSimpleName(),clone);
                 //对象内properties第一层
                 for (Field declaredField : declaredFields) {
                     if(declaredField.isAnnotationPresent(ParamIgnore.class)){

@@ -35,6 +35,7 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
     public void scan(){
         Map<String, Object> restControllerMap = applicationContext.getBeansWithAnnotation(RestController.class);
         Swagger swagger = Swagger.initialize();
+        swagger.setDefinitions(Factory.definitions);
         swagger.setBasePath(StringUtils.hasText(e.getProperty("server.servlet.context-path"))?e.getProperty("server.servlet.context-path"):"/");
         List<Swagger.Tag> tags = new ArrayList<>();
         JSONObject paths = new JSONObject();
@@ -65,6 +66,7 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
         if(StringUtils.hasText(propertiesConfig.getHost()) && StringUtils.hasText(propertiesConfig.getToken())){
             YapiApi.importDoc(propertiesConfig.getToken(),propertiesConfig.getHost(),json);
         }
+        Factory.definitions.clear();
 
 
     }
