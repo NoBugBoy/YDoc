@@ -3,7 +3,7 @@
 > 充分利用springboot自有注解来对文档进行描述的一款文档生成器。
 > 让我们抛弃大量注解和配置一起拥抱简洁。
 
-### [YDoc源码Github仓库地址](https://github.com/NoBugBoy/YDoc)
+### [YDoc图文版使用教程，方便更好的理解和使用。](https://blog.csdn.net/Day_Day_No_Bug/article/details/117512788?spm=1001.2014.3001.5501)
 # 引言
 每当工程需要接口文档时，总会使用Swagger一类的restfulApi文档生成工具，相信很多人在使用时都会被它的一些注解和配置恶心到，如果工程对代码规范无要求还能作为注释来看，如果需要再写Javadoc注释就无形中增加了工作量，为了更加简单的使用我写了一款基于spring-boot-starter的依赖库，它基于YApi平台可以统一管理api文档和权限控制，mock数据等。
 
