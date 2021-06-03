@@ -8,6 +8,7 @@ import com.github.ydoc.yapi.RequestBodyType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -377,7 +378,15 @@ public class RequestTypeMatchingSwagger {
 
                 }
                 jsonObject.put("properties",filedObject);
+                jsonObject.put("$ref","#/definitions/"+actualTypeArgument.getSimpleName());
                 json.put("items",jsonObject);
+                JSONObject clone = (JSONObject)filedObject.clone();
+                clone.remove("$ref");
+                JSONObject innerRef = new JSONObject();
+                innerRef.put("properties",clone);
+                // innerRef.put("type","project");
+                // innerRef.put("title",actualTypeArgument.getSimpleName());
+                Factory.definitions.put(actualTypeArgument.getSimpleName(),innerRef);
                 json.put("description",desc);
             }
             return json;
