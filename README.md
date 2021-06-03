@@ -29,7 +29,7 @@ Swagger是基于注解形式生成api文档的工具，对接口的参数，返�
 
 ### 2. YDoc的使用方法（基于YApi版本1.9.2）
 
-1. 需搭建YApi文档平台（[YApi官方文档](https://hellosean1025.github.io/yapi/devops/index.html)）
+1. 需搭建YApi文档平台（[YApi官方文档](https://hellosean1025.github.io/yapi/devops/index.html)）[只想使用swaggerui可以忽略]
 2. 项目中引用ydoc-spring-boot-starter依赖
 3. 配置 ydoc.enable = true
 4. 如果想要使用YApi，需在配置文件中配置YApi的url，以及项目的token
