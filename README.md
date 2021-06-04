@@ -12,24 +12,24 @@
 #### 1.JDoc
 JDoc是根据文档注释去生成api文档的工具，需要遵循JDoc定义的文档规范进行书写才能生成对应的接口文档，不支持mock数据,权限管理等，不能集中管理Api，强制依赖于Javadoc规范实现，静态页面部署不方便，对离线支持好。
 
- - 优点是只需要写Javadoc即可无需引入额外配置。
- - 缺点是强制依赖于Javadoc规范,对api测试不友好，生成需额外操作。
+- 优点是只需要写Javadoc即可无需引入额外配置。
+- 缺点是强制依赖于Javadoc规范,对api测试不友好，生成需额外操作。
 
 #### 2.Swagger2
 Swagger是基于注解形式生成api文档的工具，对接口的参数，返回值等都需要加对应的注释才能生成对应的api文档，支持api测试，不支持mock数据,权限管理等，不能集中管理Api，不方便离线，随程序部署而部署。
 
- - 优点是操作简单，接口生成的比较好，随程序部署而部署使用方便。
- - 缺点是集成麻烦，依赖大量注解，增加开发成本。
- 
- #### 3.YDoc
- Ydoc是一款基于spring-boot-starter的依赖库，轻量级，无Ui界面，不依赖注释，少量依赖注解和使用规范，整体依赖于YApi接口可视化平台，可使用YApi的所有特征，与程序部署分离可集中化管理，支持权限控制等，集成快速高效，配置依赖，加上两行配置程序启动时即可自动生成。
- 
-  - 优点是可使用YApi平台的特性，侵入性更低，0配置，引入依赖添加配置文件即可。
- - 缺点是少量依赖注解和使用规范，仅支持spring-boot工程
+- 优点是操作简单，接口生成的比较好，随程序部署而部署使用方便。
+- 缺点是集成麻烦，依赖大量注解，增加开发成本。
+
+#### 3.YDoc
+Ydoc是一款基于spring-boot-starter的依赖库，轻量级，无Ui界面，不依赖注释，少量依赖注解和使用规范，整体依赖于YApi接口可视化平台，可使用YApi的所有特征，与程序部署分离可集中化管理，支持权限控制等，集成快速高效，配置依赖，加上两行配置程序启动时即可自动生成。
+
+- 优点是可使用YApi平台的特性，侵入性更低，0配置，引入依赖添加配置文件即可。
+- 缺点是少量依赖注解和使用规范，仅支持spring-boot工程
 
 ### 2. YDoc的使用方法（基于YApi版本1.9.2）
 
-1. 需搭建YApi文档平台（[YApi官方文档](https://hellosean1025.github.io/yapi/devops/index.html)）[只想使用swaggerui可以忽略]
+1. 需搭建YApi文档平台（[YApi官方文档](https://hellosean1025.github.io/yapi/devops/index.html)）
 2. 项目中引用ydoc-spring-boot-starter依赖
 3. 配置 ydoc.enable = true
 4. 如果想要使用YApi，需在配置文件中配置YApi的url，以及项目的token
@@ -39,11 +39,15 @@ Swagger是基于注解形式生成api文档的工具，对接口的参数，返�
 
 
 如果不能直接依赖说明还没有同步到中央maven（1.0.2才支持Swagger-bootstrap-ui ）
+### 版本说明
+1.0.1支持YDoc方式生成YApi文档
+1.0.2支持YDoc方式生成Swagger文档
+1.0.3支持Swagger原生注解生成Swagger文档,并同步导入到YApi（**方便已经使用了swagger原生注解，但是还想快速导入YApi的用户，拒绝使用YApi轮训导入从我做起**）
 ```xml
        <dependency>
             <groupId>com.github.nobugboy</groupId>
             <artifactId>ydoc-spring-boot-starter</artifactId>
-            <version>1.0.2</version>
+            <version>1.0.3</version>
         </dependency>
 ```
 
@@ -52,7 +56,10 @@ Swagger是基于注解形式生成api文档的工具，对接口的参数，返�
 | ydoc.token | YApi项目中生成的token |否|
 | ydoc.host | YApi的url,例http://localhost:3000 |否|
 | ydoc.enable | 程序启动时是否同步到YApi平台 |是|
-| ydoc.print | 程序启动时是否打印离线JSON（可手动导入到YApi） |否|
+| ydoc.print | 程序启动时是否打印离线JSON（可手动导入到YApi或其他文档平台） |否|
+| ydoc.swagger-native | 是否启用Swagger原生配置生成文档（方便已经集成了swagger得用户） |否|
+
+注意当开启了swagger-native，需要将原工程的swagger依赖删除即可。（YDoc内部使用swagger3.0）
 
 ### 3. YApi的使用步骤
 1. 在搭建好的YApi平台上创建好对应工程的项目
@@ -94,7 +101,8 @@ Swagger是基于注解形式生成api文档的工具，对接口的参数，返�
 
 
 ### 7.话外音
-参数描述的注解是逼不得已。后续会考虑加入@valid相关的处理，从中考虑是否可以"见缝插针"
+[详细步骤请参考YDoc使用图文教程](https://blog.csdn.net/Day_Day_No_Bug/article/details/117512788?spm=1001.2014.3001.5501)
+
 
 
 
