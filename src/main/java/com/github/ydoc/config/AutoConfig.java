@@ -23,6 +23,7 @@ public class AutoConfig {
 
     @Bean
     @Primary
+    @ConditionalOnProperty(prefix = "ydoc",name = "swaggerNative",havingValue = "true")
     public SwaggerResourcesConfig swaggerResourcesConfig(){
         return new SwaggerResourcesConfig();
     }

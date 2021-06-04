@@ -8,7 +8,6 @@ import com.github.ydoc.yapi.RequestBodyType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -19,7 +18,7 @@ import java.util.*;
  **/
 
 public class RequestTypeMatchingSwagger {
-    public static JSONObject matching(JSONObject json,Method method, String outPath,String tag){
+    public static void matching(JSONObject json,Method method, String outPath,String tag){
         if(method.isAnnotationPresent(GetMapping.class)){
             GetMapping getMapping = method.getAnnotation(GetMapping.class);
             String path = "";
@@ -27,7 +26,7 @@ public class RequestTypeMatchingSwagger {
                 //base拼接restfulApi的路径
                 path = getMapping.value()[0];
             }
-            return get(getMapping.name(),path,json,method,outPath,tag);
+            get(getMapping.name(), path, json, method, outPath, tag);
         }else if(method.isAnnotationPresent(PostMapping.class)){
             PostMapping annotation = method.getAnnotation(PostMapping.class);
             String path = "";
@@ -35,7 +34,7 @@ public class RequestTypeMatchingSwagger {
                 //base拼接restfulApi的路径
                 path = annotation.value()[0];
             }
-            return post(annotation.name(),path,json,method,outPath,tag);
+            post(annotation.name(), path, json, method, outPath, tag);
         }else if(method.isAnnotationPresent(PutMapping.class)){
             PutMapping annotation = method.getAnnotation(PutMapping.class);
             String path = "";
@@ -43,7 +42,7 @@ public class RequestTypeMatchingSwagger {
                 //base拼接restfulApi的路径
                 path = annotation.value()[0];
             }
-            return put(annotation.name(),path,json,method,outPath,tag);
+            put(annotation.name(), path, json, method, outPath, tag);
         }else if(method.isAnnotationPresent(DeleteMapping.class)){
             DeleteMapping annotation = method.getAnnotation(DeleteMapping.class);
             String path = "";
@@ -51,7 +50,7 @@ public class RequestTypeMatchingSwagger {
                 //base拼接restfulApi的路径
                 path = annotation.value()[0];
             }
-            return delete(annotation.name(),path,json,method,outPath,tag);
+            delete(annotation.name(), path, json, method, outPath, tag);
         }else if(method.isAnnotationPresent(RequestMapping.class)){
             RequestMapping annotation = method.getAnnotation(RequestMapping.class);
             RequestMethod requestMethod = null;
@@ -65,19 +64,25 @@ public class RequestTypeMatchingSwagger {
             }
             if(requestMethod != null){
                 switch (requestMethod){
-                    case GET: return get(requestMethod.name(),path,json,method,outPath,tag);
-                    case PUT:return put(requestMethod.name(),path,json,method,outPath,tag);
-                    case POST:return post(requestMethod.name(),path,json,method,outPath,tag);
-                    case DELETE:return delete(requestMethod.name(),path,json,method,outPath,tag);
+                    case GET:
+                        get(requestMethod.name(), path, json, method, outPath, tag);
+                        return;
+                    case PUT:
+                        put(requestMethod.name(), path, json, method, outPath, tag);
+                        return;
+                    case POST:
+                        post(requestMethod.name(), path, json, method, outPath, tag);
+                        return;
+                    case DELETE:
+                        delete(requestMethod.name(), path, json, method, outPath, tag);
+                        return;
                     default:
-                        return Factory.get();
                 }
             }
         }else {
             //nothing
-            return new JSONObject();
+            new JSONObject();
         }
-        return Factory.get();
     }
     public static void returnBuild(Method method, JSONObject json){
         JSONObject res = Factory.get();
@@ -144,7 +149,7 @@ public class RequestTypeMatchingSwagger {
     }
 
 
-    private static JSONObject get(String name,String path,JSONObject api,Method method, String outPath,String tag){
+    private static void get(String name,String path,JSONObject api,Method method, String outPath,String tag){
         //方法对象
         JSONObject apiMethod = Factory.get();
         api.put(outPath + path,apiMethod);
@@ -227,9 +232,8 @@ public class RequestTypeMatchingSwagger {
                 parametersJson.add(param);
             }
         }
-        return api;
     }
-    private static JSONObject post(String name,String path,JSONObject api,Method method, String outPath,String tag){
+    private static void post(String name,String path,JSONObject api,Method method, String outPath,String tag){
         //方法对象
         JSONObject apiMethod = Factory.get();
         api.put(outPath + path,apiMethod);
@@ -247,9 +251,8 @@ public class RequestTypeMatchingSwagger {
         returnBuild(method,content);
         //restfulApi接口的描述/功能
         baseRequestBody(method.getParameters(),parametersJson);
-        return api;
     }
-    private static JSONObject delete(String name,String path,JSONObject api,Method method, String outPath,String tag){
+    private static void delete(String name,String path,JSONObject api,Method method, String outPath,String tag){
         //方法对象
         JSONObject apiMethod = Factory.get();
         api.put(outPath + path,apiMethod);
@@ -267,9 +270,8 @@ public class RequestTypeMatchingSwagger {
         returnBuild(method,content);
         //restfulApi接口的描述/功能
         baseRequestBody(method.getParameters(),parametersJson);
-        return api;
     }
-    private static JSONObject put(String name,String path,JSONObject api,Method method, String outPath,String tag){
+    private static void put(String name,String path,JSONObject api,Method method, String outPath,String tag){
         //方法对象
         JSONObject apiMethod = Factory.get();
         api.put(outPath + path,apiMethod);
@@ -287,7 +289,6 @@ public class RequestTypeMatchingSwagger {
         returnBuild(method,content);
         //restfulApi接口的描述/功能
         baseRequestBody(method.getParameters(),parametersJson);
-        return api;
     }
 
     private static void baseRequestBody(Parameter[] parameters,List<JSONObject> list){

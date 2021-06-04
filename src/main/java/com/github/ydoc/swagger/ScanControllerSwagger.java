@@ -4,9 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ydoc.config.YDocPropertiesConfig;
 import com.github.ydoc.config.YapiApi;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -15,11 +17,15 @@ import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.service.Documentation;
+import springfox.documentation.spring.web.DocumentationCache;
+import springfox.documentation.swagger2.mappers.ServiceModelToSwagger2Mapper;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * author yujian
@@ -27,16 +33,25 @@ import java.util.Map;
  * create 2021-04-22 14:24
  **/
 @EnableConfigurationProperties(YDocPropertiesConfig.class)
-public class ScanControllerSwagger implements ApplicationContextAware, EnvironmentAware, InitializingBean {
+@Slf4j
+public class ScanControllerSwagger implements ApplicationContextAware, EnvironmentAware, InitializingBean,
+    CommandLineRunner {
     @Autowired
-    YDocPropertiesConfig propertiesConfig;
+    YDocPropertiesConfig         propertiesConfig;
+    @Autowired
+    DocumentationCache           documentationCache;
+    @Autowired
+    ServiceModelToSwagger2Mapper map;
+
     private ApplicationContext applicationContext;
     private Environment e;
+
+    Supplier<String> basePath = () -> StringUtils.hasText(e.getProperty("server.servlet.context-path"))?e.getProperty("server.servlet.context-path"):"/";
     public void scan(){
         Map<String, Object> restControllerMap = applicationContext.getBeansWithAnnotation(RestController.class);
         Swagger swagger = Swagger.initialize();
         swagger.setDefinitions(Factory.definitions);
-        swagger.setBasePath(StringUtils.hasText(e.getProperty("server.servlet.context-path"))?e.getProperty("server.servlet.context-path"):"/");
+        swagger.setBasePath(basePath.get());
         List<Swagger.Tag> tags = new ArrayList<>();
         JSONObject paths = new JSONObject();
         for (Map.Entry<String, Object> object : restControllerMap.entrySet()) {
@@ -58,17 +73,24 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
         }
         swagger.setPaths(paths);
         swagger.setTags(tags);
-        String json = JSON.toJSONString(swagger);
-        Factory.json = json;
+        Factory.json = JSON.toJSONString(swagger);
         if(propertiesConfig.isPrint()){
-            System.out.println(json);
+            print();
         }
-        if(StringUtils.hasText(propertiesConfig.getHost()) && StringUtils.hasText(propertiesConfig.getToken())){
-            YapiApi.importDoc(propertiesConfig.getToken(),propertiesConfig.getHost(),json);
+        if(enableImport()){
+            importToYApi();
         }
-        Factory.definitions.clear();
 
-
+    }
+    public void print(){
+        log.info(Factory.json);
+    }
+    public boolean enableImport(){
+        return StringUtils.hasText(propertiesConfig.getHost()) && StringUtils.hasText(propertiesConfig.getToken());
+    }
+    public synchronized void importToYApi(){
+            YapiApi.importDoc(propertiesConfig.getToken(),propertiesConfig.getHost(),Factory.json);
+            Factory.definitions.clear();
     }
 
     @Override
@@ -95,9 +117,33 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
     @Override
     public void afterPropertiesSet() throws Exception {
         if(propertiesConfig.isEnable()){
-            System.out.println(" >>> YDoc Sync Api start !<<<");
-            scan();
-            System.out.println(" >>> YDoc Sync Api Successful !<<<");
+            log.info(" >>> YDoc Sync Api start !<<<");
+            if(!propertiesConfig.isSwaggerNative() && documentationCache!=null && map!=null && enableImport()){
+                scan();
+            }
+            log.info(" >>> YDoc Sync Api Successful !<<<");
         }
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        if(propertiesConfig.isSwaggerNative() && documentationCache!=null && map!=null && enableImport()){
+            //这里暂时只考虑一个group的时候，因为大多数情况都是只有一个default
+            log.info(" >>> YDoc Sync Api start !<<<");
+            if(documentationCache.all().values().size() > 0){
+                Documentation             documentation = new ArrayList<>(documentationCache.all().values()).get(0);
+                io.swagger.models.Swagger swagger       = this.map.mapDocumentation(documentation);
+                swagger.setBasePath(basePath.get());
+                Factory.json = JSON.toJSONString(swagger);
+                if(propertiesConfig.isPrint()){
+                    print();
+                }
+                importToYApi();
+            }else{
+                log.warn("未发现任何Api,可能未配置Swagger2 Config....");
+            }
+            log.info(" >>> YDoc Sync Api Successful !<<<");
+        }
+
     }
 }

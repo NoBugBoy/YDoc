@@ -16,15 +16,15 @@ import org.springframework.web.client.RestTemplate;
 public class YapiApi {
     public static void importDoc(String token,String host,String json){
         if(!StringUtils.hasText(token)){
-            System.err.println("YApi token is empty");
+            System.err.println("YApi token is null");
             return;
         }
         if(!StringUtils.hasText(host)){
-            System.err.println("YApi host is empty");
+            System.err.println("YApi host is null");
             return;
         }
         if(!StringUtils.hasText(json)){
-            System.err.println("json is empty");
+            System.err.println("json is null");
             return;
         }
         RestTemplate restTemplate = new RestTemplate();

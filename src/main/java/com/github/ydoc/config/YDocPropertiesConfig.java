@@ -8,7 +8,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * author yujian
  * description
  * create 2021-04-22 14:46
- **/
+ *
+ * @author yujian*/
 
 @Getter
 @Setter
@@ -30,5 +31,11 @@ public class YDocPropertiesConfig {
      * 打印导入的json,方便离线导入
      */
     private boolean print = false;
+    /**
+     * 是否启用原生Swagger注解来生成api文档
+     * 需要配置swagger扫包等config,并且移除相关pom依赖
+     * （YDoc默认为swagger3.0）
+     */
+    private boolean swaggerNative = false;
 
 }

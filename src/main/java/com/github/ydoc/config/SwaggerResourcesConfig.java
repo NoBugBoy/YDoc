@@ -6,6 +6,9 @@ import springfox.documentation.swagger.web.SwaggerResourcesProvider;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * @author yujian
+ */
 public class SwaggerResourcesConfig implements SwaggerResourcesProvider {
     
         @Override

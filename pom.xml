@@ -10,10 +10,10 @@
     </parent>
     <groupId>com.github.nobugboy</groupId>
     <artifactId>ydoc-spring-boot-starter</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <name>ydoc-spring-boot-starter</name>
     <packaging>jar</packaging>
-    <description>自动生成yapi文档</description>
+    <description>YDoc一款低侵入性、简洁并同时支持SwaggerUi和YApi的文档生成器</description>
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -52,7 +52,7 @@
         </developer>
     </developers>
     <properties>
-        <swagger.version>2.9.2</swagger.version>
+        <swagger.version>3.0.0</swagger.version>
         <swagger-bootstrap-ui.version>1.9.6</swagger-bootstrap-ui.version>
         <java.version>1.8</java.version>
     </properties>
