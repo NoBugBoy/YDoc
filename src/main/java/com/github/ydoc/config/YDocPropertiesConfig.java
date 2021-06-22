@@ -1,8 +1,11 @@
 package com.github.ydoc.config;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.util.List;
 
 /**
  * author yujian
@@ -11,8 +14,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @author yujian*/
 
-@Getter
-@Setter
+@Data
 @ConfigurationProperties(prefix = "ydoc")
 public class YDocPropertiesConfig {
     /**
@@ -24,9 +26,33 @@ public class YDocPropertiesConfig {
      */
     private String host;
     /**
+     * yapi项目id,在设置中查看(自动化测试时使用)
+     */
+    private String       id;
+    /**
+     * yapi登录邮箱(自动化测试时使用)
+     */
+    private String       yapiUserEmail;
+    /**
+     * yapi密码(自动化测试时使用)
+     */
+    private String       yapiUserPassword;
+    /**
+     * 自动化测试集合名称(自动化测试时使用)
+     */
+    private List<String> testName;
+    /**
+     * 钉钉机器人accessToken(自动化测试时使用)
+     */
+    private String       accessToken;
+    /**
      * 是否启动时开始导入更新api文档
      */
     private boolean enable = true;
+    /**
+     * 是否开启自动化测试
+     */
+    private boolean autoTest = false;
     /**
      * 是否是微服务模式
      */

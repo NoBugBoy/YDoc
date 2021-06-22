@@ -37,6 +37,10 @@ import java.util.function.Supplier;
 @Slf4j
 public class ScanControllerSwagger implements ApplicationContextAware, EnvironmentAware, InitializingBean,
     CommandLineRunner {
+    private final YapiApi yapiApi;
+    public ScanControllerSwagger(YapiApi yapiApi){
+        this.yapiApi = yapiApi;
+    }
     @Autowired
     YDocPropertiesConfig         propertiesConfig;
     @Autowired
@@ -90,7 +94,7 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
         return StringUtils.hasText(propertiesConfig.getHost()) && StringUtils.hasText(propertiesConfig.getToken());
     }
     public synchronized void importToYApi(){
-            YapiApi.importDoc(propertiesConfig.isCloud(),propertiesConfig.getToken(),propertiesConfig.getHost(),Factory.json);
+            yapiApi.importDoc(propertiesConfig.isCloud(),propertiesConfig.getToken(),propertiesConfig.getHost(),Factory.json);
             Factory.definitions.clear();
     }
 
@@ -145,6 +149,10 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
                 log.warn("未发现任何Api,可能未配置Swagger2 Config....");
             }
             log.info(" >>> YDoc Sync Api Successful !<<<");
+        }
+        //异步执行即可
+        if(StringUtils.hasText(propertiesConfig.getYapiUserEmail())&&StringUtils.hasText(propertiesConfig.getYapiUserPassword())&&StringUtils.hasText(propertiesConfig.getId()) && propertiesConfig.isAutoTest() && !propertiesConfig.isCloud()){
+            yapiApi.autoTest(propertiesConfig.getYapiUserEmail(),propertiesConfig.getYapiUserPassword(),propertiesConfig.getToken(),propertiesConfig.getHost(),propertiesConfig.getId(),propertiesConfig.getAccessToken(),propertiesConfig.getTestName());
         }
 
     }

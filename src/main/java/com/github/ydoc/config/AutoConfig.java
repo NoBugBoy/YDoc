@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * author yujian
@@ -14,11 +15,12 @@ import org.springframework.context.annotation.Primary;
  **/
 @Configuration
 @EnableConfigurationProperties(YDocPropertiesConfig.class)
+@EnableAsync
 public class AutoConfig {
     @ConditionalOnProperty(prefix="ydoc",name = "enable",havingValue = "true")
     @Bean
     public ScanControllerSwagger controllerSwagger(){
-        return new ScanControllerSwagger();
+        return new ScanControllerSwagger(yapiApi());
     }
 
     @Bean
@@ -29,8 +31,15 @@ public class AutoConfig {
     }
 
     @Bean
+    public YapiApi yapiApi(){
+        return new YapiApi();
+    }
+    @Bean
     public SwaggerApi swaggerApi(){
         return new SwaggerApi();
     }
+
+
+
 
 }
