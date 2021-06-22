@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
  * create 2021-04-28 12:04
  **/
 public class YapiApi {
-    public static void importDoc(String token,String host,String json){
+    public static void importDoc(boolean cloud,String token,String host,String json){
         if(!StringUtils.hasText(token)){
             System.err.println("YApi token is null");
             return;
@@ -30,7 +30,7 @@ public class YapiApi {
         RestTemplate restTemplate = new RestTemplate();
         JSONObject   param        = Factory.get();
         param.put("type", "swagger");
-        param.put("merge", "merge");
+        param.put("merge", cloud?"good":"merge");
         param.put("token", token);
         param.put("json", json);
         HttpHeaders headers = new HttpHeaders();

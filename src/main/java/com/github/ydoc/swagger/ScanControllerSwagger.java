@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ydoc.config.YDocPropertiesConfig;
 import com.github.ydoc.config.YapiApi;
+import io.swagger.models.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
@@ -63,7 +64,7 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
                 continue;
             }
             //controller分组
-            tags.add(new Swagger.Tag(object.getKey(),object.getKey()));
+            tags.add(new Swagger.Tag( object.getKey(),object.getKey()));
             //循环所有的restfulApi
             Method[] methods = aClass.getDeclaredMethods();
 
@@ -89,7 +90,7 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
         return StringUtils.hasText(propertiesConfig.getHost()) && StringUtils.hasText(propertiesConfig.getToken());
     }
     public synchronized void importToYApi(){
-            YapiApi.importDoc(propertiesConfig.getToken(),propertiesConfig.getHost(),Factory.json);
+            YapiApi.importDoc(propertiesConfig.isCloud(),propertiesConfig.getToken(),propertiesConfig.getHost(),Factory.json);
             Factory.definitions.clear();
     }
 
@@ -118,7 +119,7 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
     public void afterPropertiesSet() throws Exception {
         if(propertiesConfig.isEnable()){
             log.info(" >>> YDoc Sync Api start !<<<");
-            if(!propertiesConfig.isSwaggerNative() && documentationCache!=null && map!=null && enableImport()){
+            if(!propertiesConfig.isSwaggerNative()){
                 scan();
             }
             log.info(" >>> YDoc Sync Api Successful !<<<");
@@ -133,12 +134,13 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
             if(documentationCache.all().values().size() > 0){
                 Documentation             documentation = new ArrayList<>(documentationCache.all().values()).get(0);
                 io.swagger.models.Swagger swagger       = this.map.mapDocumentation(documentation);
-                swagger.setBasePath(basePath.get());
                 Factory.json = JSON.toJSONString(swagger);
                 if(propertiesConfig.isPrint()){
                     print();
                 }
                 importToYApi();
+                //help gc
+                Factory.json = null;
             }else{
                 log.warn("未发现任何Api,可能未配置Swagger2 Config....");
             }

@@ -28,6 +28,10 @@ public class YDocPropertiesConfig {
      */
     private boolean enable = true;
     /**
+     * 是否是微服务模式
+     */
+    private boolean cloud = false;
+    /**
      * 打印导入的json,方便离线导入
      */
     private boolean print = false;
