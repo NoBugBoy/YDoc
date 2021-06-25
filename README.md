@@ -45,11 +45,12 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，无Ui界面，�
 1.0.3支持Swagger原生注解生成Swagger文档,并同步导入到YApi（**方便已经使用了swagger原生注解，但是还想快速导入YApi的用户，拒绝使用YApi轮训导入从我做起**）
 1.0.4支持自动化测试，钉钉提醒和微服务
 1.0.5支持非native模式生成swagger文档，邮件提醒，web测试报告展示
+1.0.6修复bug
 ```xml
        <dependency>
             <groupId>com.github.nobugboy</groupId>
             <artifactId>ydoc-spring-boot-starter</artifactId>
-            <version>1.0.5</version>
+            <version>1.0.6</version>
         </dependency>
 ```
 
@@ -109,7 +110,6 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，无Ui界面，�
 |--|--|
 | @RestController | 注解中value描述controller的作用，默认为controller名 |
 | @RequestMapping |注解中name描述该api的作用，在类上加跟路径时不需要name |
-| @RequestParam |注解中name描述该参数的作用 |
 |@PathVariable|注解中name描述该参数的作用 |
 | @GetMapping | 注解中name描述该api的作用 |
 | @PostMapping | 注解中name描述该api的作用 |
