@@ -59,17 +59,48 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，无Ui界面，�
 | ydoc.enable | 程序启动时是否同步到YApi平台 |是|
 | ydoc.print | 程序启动时是否打印离线JSON（可手动导入到YApi或其他文档平台） |否|
 | ydoc.swagger-native | 是否启用Swagger原生配置生成文档（方便已经集成了swagger得用户） |否|
+| ydoc.cloud |  是否开启微服务模式 |否|
+| ydoc.autoTest |  是否开启自动化测试 |否|
+| ydoc.test.name |  自动化测试集合名称,可以多个(自动化测试时使用) |否|
+| ydoc.id |  yapi项目id,在设置中查看(自动化测试时使用) |否|
+| ydoc.yapi.user.email |  yapi登录邮箱(自动化测试时使用) |否|
+| ydoc.yapi.user.password |  yapi登录邮箱密码(自动化测试时使用) |否|
+| ydoc.accessToken |  钉钉机器人token(自动化测试时使用) |否|
+| ydoc.email.host |  邮件服务器(自动化测试时使用) |否|
+| ydoc.email.password |  邮箱pop3,smtp密码(自动化测试时使用) |否|
+| ydoc.email.password |  邮箱pop3,smtp密码(自动化测试时使用) |否|
 
 注意当开启了swagger-native，需要将原工程的swagger依赖删除即可。（YDoc内部使用swagger3.0）
 
-### 3. YApi的使用步骤
+### 3. YApi的使用步骤（导入YApi，YDoc方式或者原生swagger都支持）
 1. 在搭建好的YApi平台上创建好对应工程的项目
 2. 点开项目，设置-token配置，复制好token粘贴到Java工程的对应配置上
-3. 启动应用即可
-4. 回到YApi对应的项目下，此时文档已经生成
+3. 配置ydoc.enable = true，yapi-host,yapi-token
+4. 启动应用即可
+5. 回到YApi页面，文档生产完毕
+
+### 4. Swaager3的使用步骤（YDoc生成方式）
+1. 开启@EnableSwagger2
+2. 使用YDoc注解生成方式配置项目
+3. 配置ydoc.enable = true
+4. 启动应用访问 /doc.html 
+
+### 5. 原生Swaager的使用（方便已经使用原生swagger注解的项目）
+1. 和普通swagger一样配置即可，需要配置扫包和swagger注解等
+2. 配置ydoc.enable = true，swagger-native=true
+3. 启动应用访问 /doc.html 
+
+### 6. 自动化测试的使用
+1. 配置测试集合，并定义名称（英文）
+2. 配置ydoc.autoTest=true,ydoc.id,ydoc.test.name
+3. 启动应用自动开始测试（异步）
+4. 测试结束发送报告，参考下面的文章链接 
+
+（[1.0.4支持微服务模式，自动化测试，推送钉钉报告](https://juejin.cn/post/6976538974969921543)
+（[1.0.5非原生模式也支持swagger页面，邮件推送web页面展示](https://juejin.cn/post/6977577714563678221)
 
 
-### 4. 参数描述
+### 5. YDoc方式生成描述
 抛弃大量Swagger注解和配置，仅需在SpringBootWeb开发时必须注解上加额外参数对api或参数进行描述，大大减少了对工程的侵入性，简化开发流程
 
 
@@ -90,11 +121,11 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，无Ui界面，�
 | @ParamDesc| 注解中value描述该参数的描述，required是否必须 |
 | @ParamIgnore| 忽略参数 |
 
-### 5. Enum类型
+### 6. Enum类型
 对于Swagger中比较头疼的Enum类型参数描述做了一些优化处理，如果enum类型值，需要在enum中重写toString方法,返回一个字符串作为描述参数，该方式自由度较高，对于code和message可以很好地进行描述。
 
 
-### 6.使用YDoc规范建议
+### 7.使用YDoc规范建议
 1. 无论是什么请求，如果使用对象接收对象内的基本类型建议使用包装类
 2. 建议在参数上加@ParamDesc用来描述作用
 3. spring提供的注解再原有开发习惯上加name，用来描述RestController或Api的作用
