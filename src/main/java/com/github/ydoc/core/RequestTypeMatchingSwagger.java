@@ -185,12 +185,15 @@ public class RequestTypeMatchingSwagger {
                 paramName = annotation.value();
                 required = Boolean.TRUE;
                 paramDesc = StringUtils.hasText(annotation.name())?annotation.name():"path参数";
+                if(parameterType.isAnnotationPresent(ParamDesc.class)){
+                    ParamDesc pd = parameterType.getAnnotation(ParamDesc.class);
+                    paramDesc = pd.value();
+                }
                 paramType = "string";
                 in = "path";
-            } else if(parameterType.isAnnotationPresent(RequestParam.class)){
-                RequestParam annotation = parameterType.getAnnotation(RequestParam.class);
-                paramName = annotation.value();
-                paramDesc = annotation.name();
+            } else if(parameterType.isAnnotationPresent(ParamDesc.class)){
+                ParamDesc annotation = parameterType.getAnnotation(ParamDesc.class);
+                paramDesc = annotation.value();
                 required = annotation.required();
             }else{
                 //如果有其他注解则不对其生成操作

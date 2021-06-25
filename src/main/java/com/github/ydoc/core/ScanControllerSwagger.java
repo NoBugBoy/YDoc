@@ -131,7 +131,7 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
 
     @Override
     public void run(String... args) throws Exception {
-        if(propertiesConfig.isSwaggerNative() && documentationCache!=null && map!=null && enableImport()){
+        if(propertiesConfig.isSwaggerNative() && documentationCache!=null && map!=null){
             //这里暂时只考虑一个group的时候，因为大多数情况都是只有一个default
             log.info(" >>> YDoc Sync Api start !<<<");
             if(documentationCache.all().values().size() > 0){
@@ -141,9 +141,9 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
                 if(propertiesConfig.isPrint()){
                     print();
                 }
-                importToYApi();
-                //help gc
-                Factory.json = null;
+                if(enableImport()){
+                    importToYApi();
+                }
             }else{
                 log.warn("未发现任何Api,可能未配置Swagger2 Config....");
             }
