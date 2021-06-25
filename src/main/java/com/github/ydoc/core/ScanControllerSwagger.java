@@ -1,10 +1,9 @@
-package com.github.ydoc.swagger;
+package com.github.ydoc.core;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ydoc.config.YDocPropertiesConfig;
 import com.github.ydoc.config.YapiApi;
-import io.swagger.models.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
@@ -122,11 +121,11 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
     @Override
     public void afterPropertiesSet() throws Exception {
         if(propertiesConfig.isEnable()){
-            log.info(" >>> YDoc Sync Api start !<<<");
             if(!propertiesConfig.isSwaggerNative()){
+                log.info(" >>> YDoc Sync Api start !<<<");
                 scan();
+                log.info(" >>> YDoc Sync Api Successful !<<<");
             }
-            log.info(" >>> YDoc Sync Api Successful !<<<");
         }
     }
 
@@ -150,10 +149,23 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
             }
             log.info(" >>> YDoc Sync Api Successful !<<<");
         }
-        //异步执行即可
-        if(StringUtils.hasText(propertiesConfig.getYapiUserEmail())&&StringUtils.hasText(propertiesConfig.getYapiUserPassword())&&StringUtils.hasText(propertiesConfig.getId()) && propertiesConfig.isAutoTest() && !propertiesConfig.isCloud()){
-            yapiApi.autoTest(propertiesConfig.getYapiUserEmail(),propertiesConfig.getYapiUserPassword(),propertiesConfig.getToken(),propertiesConfig.getHost(),propertiesConfig.getId(),propertiesConfig.getAccessToken(),propertiesConfig.getTestName());
+        //access调用链
+        if(access()){
+            YapiAccess login = yapiApi.login();
+            //异步执行即可
+            if(propertiesConfig.isAutoTest()){
+                yapiApi.autoTest(login);
+            }
         }
+        //no access
 
+
+
+    }
+    /**
+        某些方法必须login才ok
+     */
+    private boolean access(){
+        return StringUtils.hasText(propertiesConfig.getYapiUserEmail())&&StringUtils.hasText(propertiesConfig.getYapiUserPassword());
     }
 }

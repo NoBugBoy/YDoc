@@ -1,4 +1,4 @@
-package com.github.ydoc.swagger;
+package com.github.ydoc.core;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -9,6 +9,7 @@ import com.alibaba.fastjson.JSONObject;
  **/
 public class Factory {
     public static String json;
+    public static String page;
     public static JSONObject get(){
         return new JSONObject();
     }

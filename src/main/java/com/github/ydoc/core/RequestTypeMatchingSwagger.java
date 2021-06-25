@@ -1,10 +1,9 @@
-package com.github.ydoc.swagger;
+package com.github.ydoc.core;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ydoc.anno.ParamDesc;
 import com.github.ydoc.anno.ParamIgnore;
-import com.github.ydoc.yapi.RequestBodyType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 

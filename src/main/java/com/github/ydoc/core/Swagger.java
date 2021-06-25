@@ -1,4 +1,4 @@
-package com.github.ydoc.swagger;
+package com.github.ydoc.core;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.AllArgsConstructor;

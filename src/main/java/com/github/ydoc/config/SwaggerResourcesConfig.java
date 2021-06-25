@@ -16,6 +16,7 @@ public class SwaggerResourcesConfig implements SwaggerResourcesProvider {
             SwaggerResource swaggerResource = swaggerResource("/swagger-json");
             return  Collections.singletonList(swaggerResource);
         }
+
         private SwaggerResource swaggerResource( String location){
 
             SwaggerResource swaggerResource = new SwaggerResource();

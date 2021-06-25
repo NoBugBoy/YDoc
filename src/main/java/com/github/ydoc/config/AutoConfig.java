@@ -1,12 +1,16 @@
 package com.github.ydoc.config;
 
-import com.github.ydoc.swagger.ScanControllerSwagger;
+import com.github.ydoc.core.ScanControllerSwagger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * author yujian
@@ -17,6 +21,9 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableConfigurationProperties(YDocPropertiesConfig.class)
 @EnableAsync
 public class AutoConfig {
+    @Autowired
+    private YDocPropertiesConfig yDocPropertiesConfig;
+
     @ConditionalOnProperty(prefix="ydoc",name = "enable",havingValue = "true")
     @Bean
     public ScanControllerSwagger controllerSwagger(){
@@ -25,18 +32,33 @@ public class AutoConfig {
 
     @Bean
     @Primary
-    @ConditionalOnProperty(prefix = "ydoc",name = "swaggerNative",havingValue = "true")
     public SwaggerResourcesConfig swaggerResourcesConfig(){
         return new SwaggerResourcesConfig();
     }
 
     @Bean
+    @ConditionalOnProperty(prefix="ydoc",name ={"email.password","user.email","email.host"},matchIfMissing = true)
+    public JavaMailSender javaMailSender(){
+        JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
+        javaMailSender.setPassword(yDocPropertiesConfig.getEmailPassword());
+        javaMailSender.setHost(yDocPropertiesConfig.getEmailHost());
+        javaMailSender.setUsername(yDocPropertiesConfig.getYapiUserEmail());
+        javaMailSender.setDefaultEncoding("utf-8");
+        return javaMailSender;
+    }
+
+    @Bean
     public YapiApi yapiApi(){
-        return new YapiApi();
+        return new YapiApi(javaMailSender(),yDocPropertiesConfig,yapiRestTemplate());
     }
     @Bean
     public SwaggerApi swaggerApi(){
         return new SwaggerApi();
+    }
+
+    @Bean
+    public RestTemplate yapiRestTemplate(){
+        return new RestTemplate();
     }
 
 

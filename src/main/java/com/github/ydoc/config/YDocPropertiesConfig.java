@@ -1,8 +1,6 @@
 package com.github.ydoc.config;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.List;
@@ -30,9 +28,17 @@ public class YDocPropertiesConfig {
      */
     private String       id;
     /**
-     * yapi登录邮箱(自动化测试时使用)
+     * yapi登录邮箱(自动化测试时使用,同时是发送者邮箱)
      */
     private String       yapiUserEmail;
+    /**
+     * 邮箱的host(自动化测试时使用)
+     */
+    private String       emailHost;
+    /**
+     * 邮箱pop3,smtp密码(自动化测试时使用)
+     */
+    private String       emailPassword;
     /**
      * yapi密码(自动化测试时使用)
      */
@@ -41,6 +47,10 @@ public class YDocPropertiesConfig {
      * 自动化测试集合名称(自动化测试时使用)
      */
     private List<String> testName;
+    /**
+     * 邮箱报告接收人多个(自动化测试时使用)
+     */
+    private List<String> toEmails;
     /**
      * 钉钉机器人accessToken(自动化测试时使用)
      */

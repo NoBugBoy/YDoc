@@ -1,4 +1,4 @@
-package com.github.ydoc.yapi;
+package com.github.ydoc.core;
 
 import lombok.Getter;
 
