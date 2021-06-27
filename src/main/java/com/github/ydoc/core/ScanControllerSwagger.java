@@ -42,9 +42,9 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
     }
     @Autowired
     YDocPropertiesConfig         propertiesConfig;
-    @Autowired
+    @Autowired(required = false)
     DocumentationCache           documentationCache;
-    @Autowired
+    @Autowired(required = false)
     ServiceModelToSwagger2Mapper map;
 
     private ApplicationContext applicationContext;

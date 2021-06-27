@@ -1,9 +1,13 @@
 package com.github.ydoc.config;
 
 import com.github.ydoc.core.ScanControllerSwagger;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -11,6 +15,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.client.RestTemplate;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
+import java.util.Map;
 
 /**
  * author yujian
@@ -20,9 +27,11 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 @EnableConfigurationProperties(YDocPropertiesConfig.class)
 @EnableAsync
-public class AutoConfig {
+public class AutoConfig implements ApplicationContextAware {
     @Autowired
     private YDocPropertiesConfig yDocPropertiesConfig;
+
+    private ApplicationContext applicationContext;
 
     @ConditionalOnProperty(prefix="ydoc",name = "enable",havingValue = "true")
     @Bean
@@ -32,6 +41,7 @@ public class AutoConfig {
 
     @Bean
     @Primary
+    @ConditionalOnClass(EnableSwagger2.class)
     public SwaggerResourcesConfig swaggerResourcesConfig(){
         return new SwaggerResourcesConfig();
     }
@@ -61,7 +71,8 @@ public class AutoConfig {
         return new RestTemplate();
     }
 
-
-
-
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
 }

@@ -16,7 +16,8 @@ import java.util.*;
  * create 2021-04-23 12:25
  **/
 
-public class RequestTypeMatchingSwagger {
+public class RequestTypeMatchingSwagger{
+
     public static void matching(JSONObject json,Method method, String outPath,String tag){
         if(method.isAnnotationPresent(GetMapping.class)){
             GetMapping getMapping = method.getAnnotation(GetMapping.class);
