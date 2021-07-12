@@ -66,6 +66,9 @@ public class ScanControllerSwagger implements ApplicationContextAware, Environme
             if(StringUtils.hasText(outPath) && !outPath.startsWith("/") || "/swagger-json".equals(outPath)){
                 continue;
             }
+            if(object.getKey().contains("swaggerApi")){
+                continue;
+            }
             //controller分组
             tags.add(new Swagger.Tag( object.getKey(),object.getKey()));
             //循环所有的restfulApi
