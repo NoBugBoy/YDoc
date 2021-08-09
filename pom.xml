@@ -46,7 +46,7 @@
     </profiles>
     <developers>
         <developer>
-            <name>yujian</name>
+            <name>NoBugBoY</name>
             <email>daydaynotbug@163.com</email>
             <url>https://github.com/NoBugBoy/</url>
         </developer>
@@ -90,11 +90,11 @@
             <optional>true</optional>
         </dependency>
 
-            <dependency>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok</artifactId>
-                <version>1.16.10</version>
-            </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.10</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

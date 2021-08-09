@@ -7,22 +7,22 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * @author yujian
+ * @author NoBugBoY
  */
 public class SwaggerResourcesConfig implements SwaggerResourcesProvider {
-    
-        @Override
-        public List<SwaggerResource> get() {
-            SwaggerResource swaggerResource = swaggerResource("/swagger-json");
-            return  Collections.singletonList(swaggerResource);
-        }
 
-        private SwaggerResource swaggerResource( String location){
+    @Override
+    public List<SwaggerResource> get() {
+	SwaggerResource swaggerResource = swaggerResource("/swagger-json");
+	return Collections.singletonList(swaggerResource);
+    }
 
-            SwaggerResource swaggerResource = new SwaggerResource();
-            swaggerResource.setLocation(location);
-            swaggerResource.setName("default");
-            swaggerResource.setSwaggerVersion("2.0");
-            return swaggerResource;
-        }
+    private SwaggerResource swaggerResource(String location) {
+
+	SwaggerResource swaggerResource = new SwaggerResource();
+	swaggerResource.setLocation(location);
+	swaggerResource.setName("default");
+	swaggerResource.setSwaggerVersion("2.0");
+	return swaggerResource;
+    }
 }

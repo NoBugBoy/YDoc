@@ -4,13 +4,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * author yujian
+ * author NoBugBoY
  */
 @SpringBootApplication
-public class AutomaticGenerationApplication  {
+public class AutomaticGenerationApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(AutomaticGenerationApplication.class, args);
+	SpringApplication.run(AutomaticGenerationApplication.class, args);
     }
 
 }

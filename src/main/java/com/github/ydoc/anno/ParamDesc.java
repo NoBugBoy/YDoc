@@ -6,13 +6,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * author yujian
- * description 参数描述
- * create 2021-04-23 17:17
+ * author NoBugBoY description 参数描述 create 2021-04-23 17:17
  **/
-@Target({ElementType.FIELD,ElementType.PARAMETER})
+@Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ParamDesc {
     String value() default "";
+
     boolean required() default false;
 }

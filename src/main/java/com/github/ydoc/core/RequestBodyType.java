@@ -3,7 +3,7 @@ package com.github.ydoc.core;
 import lombok.Getter;
 
 /**
- * author yujian
+ * author NoBugBoY
  */
 
 public enum RequestBodyType {
@@ -35,26 +35,30 @@ public enum RequestBodyType {
      * integer
      */
     INTEGER("integer");
-    RequestBodyType(String type){
-        this.type =type;
+
+    RequestBodyType(String type) {
+	this.type = type;
     }
+
     @Getter
     public String type;
-    public static RequestBodyType of(String low){
-        for (RequestBodyType value : values()) {
-            if(value.getType().equalsIgnoreCase(low)){
-                return value;
-            }
-        }
-        switch (low.toLowerCase()){
-            case "long" :
-            case "short" :
-            case "double" :
-            case "float" :
-            case "bigdecimal" : return NUMBER;
-            default:
-        }
 
-        return OBJECT;
+    public static RequestBodyType of(String low) {
+	for (RequestBodyType value : values()) {
+	    if (value.getType().equalsIgnoreCase(low)) {
+		return value;
+	    }
+	}
+	switch (low.toLowerCase()) {
+	case "long":
+	case "short":
+	case "double":
+	case "float":
+	case "bigdecimal":
+	    return NUMBER;
+	default:
+	}
+
+	return OBJECT;
     }
 }

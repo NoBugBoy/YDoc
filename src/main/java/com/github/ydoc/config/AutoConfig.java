@@ -18,9 +18,7 @@ import org.springframework.web.client.RestTemplate;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
- * author yujian
- * description
- * create 2021-04-22 14:22
+ * author NoBugBoY description create 2021-04-22 14:22
  **/
 @Configuration
 @EnableConfigurationProperties(YDocPropertiesConfig.class)
@@ -31,46 +29,48 @@ public class AutoConfig implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
 
-    @ConditionalOnProperty(prefix="ydoc",name = "enable",havingValue = "true")
+    @ConditionalOnProperty(prefix = "ydoc", name = "enable", havingValue = "true")
     @Bean
-    public ScanControllerSwagger controllerSwagger(){
-        return new ScanControllerSwagger(yapiApi());
+    public ScanControllerSwagger controllerSwagger() {
+	return new ScanControllerSwagger(yapiApi());
     }
 
     @Bean
     @Primary
     @ConditionalOnClass(EnableSwagger2.class)
-    public SwaggerResourcesConfig swaggerResourcesConfig(){
-        return new SwaggerResourcesConfig();
+    public SwaggerResourcesConfig swaggerResourcesConfig() {
+	return new SwaggerResourcesConfig();
     }
 
     @Bean
-    @ConditionalOnProperty(prefix="ydoc",name ={"email.password","user.email","email.host"},matchIfMissing = true)
-    public JavaMailSender javaMailSender(){
-        JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
-        javaMailSender.setPassword(yDocPropertiesConfig.getEmailPassword());
-        javaMailSender.setHost(yDocPropertiesConfig.getEmailHost());
-        javaMailSender.setUsername(yDocPropertiesConfig.getYapiUserEmail());
-        javaMailSender.setDefaultEncoding("utf-8");
-        return javaMailSender;
+    @ConditionalOnProperty(prefix = "ydoc", name = { "email.password", "user.email",
+	    "email.host" }, matchIfMissing = true)
+    public JavaMailSender javaMailSender() {
+	JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
+	javaMailSender.setPassword(yDocPropertiesConfig.getEmailPassword());
+	javaMailSender.setHost(yDocPropertiesConfig.getEmailHost());
+	javaMailSender.setUsername(yDocPropertiesConfig.getYapiUserEmail());
+	javaMailSender.setDefaultEncoding("utf-8");
+	return javaMailSender;
     }
 
     @Bean
-    public YapiApi yapiApi(){
-        return new YapiApi(javaMailSender(),yDocPropertiesConfig,yapiRestTemplate());
-    }
-    @Bean
-    public SwaggerApi swaggerApi(){
-        return new SwaggerApi();
+    public YapiApi yapiApi() {
+	return new YapiApi(javaMailSender(), yDocPropertiesConfig, yapiRestTemplate());
     }
 
     @Bean
-    public RestTemplate yapiRestTemplate(){
-        return new RestTemplate();
+    public SwaggerApi swaggerApi() {
+	return new SwaggerApi();
+    }
+
+    @Bean
+    public RestTemplate yapiRestTemplate() {
+	return new RestTemplate();
     }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
+	this.applicationContext = applicationContext;
     }
 }
