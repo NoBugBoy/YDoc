@@ -50,11 +50,12 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，无Ui界面，�
 1.0.4支持自动化测试，钉钉提醒和微服务
 1.0.5支持非native模式生成swagger文档，邮件提醒，web测试报告展示
 1.0.6修复bug
-```xml
+1.0.6修复匿名内部类解析问题 参考 https://juejin.cn/post/6994640102974554143
+```xml 
        <dependency>
             <groupId>com.github.nobugboy</groupId>
             <artifactId>ydoc-spring-boot-starter</artifactId>
-            <version>1.0.6</version>
+            <version>1.0.7</version>
         </dependency>
 ```
 
