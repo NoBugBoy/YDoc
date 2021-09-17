@@ -1,5 +1,6 @@
 package com.github.ydoc.config;
 
+import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.swagger.web.SwaggerResource;
 import springfox.documentation.swagger.web.SwaggerResourcesProvider;
 
@@ -18,11 +19,10 @@ public class SwaggerResourcesConfig implements SwaggerResourcesProvider {
     }
 
     private SwaggerResource swaggerResource(String location) {
-
 	SwaggerResource swaggerResource = new SwaggerResource();
 	swaggerResource.setLocation(location);
 	swaggerResource.setName("default");
-	swaggerResource.setSwaggerVersion("2.0");
+	swaggerResource.setSwaggerVersion(DocumentationType.SWAGGER_2.getVersion());
 	return swaggerResource;
     }
 }

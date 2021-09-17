@@ -28,7 +28,7 @@ public class Swagger {
     @Setter
     public static class Info {
 	private String title = "YDoc(同时支持SwaggerUi和YApi的一款无侵入api文档生成器)";
-	private String version = "1.0.7";
+	private String version = "1.0.8";
 	private String description = "YDoc生成的RestfulApi文档";
 	private Author contact = new Author();
 	private String termsOfService = "https://github.com/NoBugBoy/YDoc";
