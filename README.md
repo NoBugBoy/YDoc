@@ -51,7 +51,7 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，无Ui界面，�
 5. 1.0.5支持非native模式生成swagger文档，邮件提醒，web测试报告展示
 6. 1.0.6修复bug
 7. 1.0.7修复匿名内部类解析问题 参考 https://juejin.cn/post/6994640102974554143
-8. 1.0.8修复单泛型返回值无法解析问题 https://github.com/NoBugBoy/YDoc/issues/8 和生成嵌套对象结构会出现缺少部分参数的问题，新增了banner
+8. 1.0.8修复issue问题https://github.com/NoBugBoy/YDoc/issues/8 tag： https://github.com/NoBugBoy/YDoc/releases/tag/1.0.8
 ```xml 
        <dependency>
             <groupId>com.github.nobugboy</groupId>
