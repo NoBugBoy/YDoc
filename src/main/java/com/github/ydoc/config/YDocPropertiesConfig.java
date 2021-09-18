@@ -75,4 +75,5 @@ public class YDocPropertiesConfig {
      */
     private boolean swaggerNative = false;
 
+
 }

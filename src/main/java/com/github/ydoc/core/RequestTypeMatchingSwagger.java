@@ -138,18 +138,46 @@ public class RequestTypeMatchingSwagger {
 	    jsonObject.put("type", RequestBodyType.of(returnType.getSimpleName()).type);
 	    schema.put("properties", properties);
 	} else {
-	    // 尝试从定义中获取，如果没有再去组装properties，这种情况可能对于使用了内部类不太友好解析不出来内容
-	    if (returnType.getName().contains("$")) {
-		schema.put("$ref", "#/definitions/"
-			+ returnType.getName().substring(returnType.getName().lastIndexOf(".") + 1).replace("$", "."));
-	    } else {
-		schema.put("$ref", "#/definitions/" + returnType.getSimpleName());
-	    }
+		//判断是不是泛型
+		Type genericReturnType = method.getGenericReturnType();
+		Type objectType = null;
+		if (genericReturnType instanceof ParameterizedType){
+			//有泛型
+			//多泛型
+			Type[] actualTypeArguments = ((ParameterizedType)genericReturnType).getActualTypeArguments();
+			//暂时只处理单泛型，将该泛型指向object上
+			if (actualTypeArguments.length > 0){
+				objectType = actualTypeArguments[0];
+			}
+		}
+		JSONObject objectTypeJSON = Factory.get();
+		for (Field declaredField : getAllFiled(returnType)) {
+			//临时支持单泛型返回值 https://github.com/NoBugBoy/YDoc/issues/8
+			if(objectType != null && "Object".equals(declaredField.getType().getSimpleName())){
+				//将该类型指向给Object
+				objectTypeJSON.put(declaredField.getName(), deepObject(Factory.get(), declaredField,objectType));
+			}else{
+				objectTypeJSON.put(declaredField.getName(), deepObject(Factory.get(), declaredField));
+			}
 
-	    for (Field declaredField : getAllFiled(returnType)) {
-		properties.put(declaredField.getName(), deepObject(Factory.get(), declaredField));
-	    }
-	    schema.put("properties", properties);
+		}
+		if (!returnType.getName().toLowerCase().contains("json")) {
+			JSONObject jsonObject = Factory.get();
+			jsonObject.put("properties", objectTypeJSON);
+			jsonObject.put("type", RequestBodyType.OBJECT.type);
+			jsonObject.put("title", returnType.getSimpleName());
+			if (returnType.getName().contains("$")) {
+				// 处理匿名内部类
+				Factory.definitions.put(
+					returnType.getName().substring(returnType.getName().lastIndexOf(".") + 1).replace("$", "."), jsonObject);
+				schema.put("$ref", "#/definitions/" + returnType.getName().substring(returnType.getName().lastIndexOf(".") + 1).replace("$", "."));
+			} else {
+				Factory.definitions.put(returnType.getSimpleName(), jsonObject);
+				schema.put("$ref", "#/definitions/" + returnType.getSimpleName());
+			}
+		} else {
+			schema.put("properties", objectTypeJSON);
+		}
 	}
 
     }
@@ -343,7 +371,7 @@ public class RequestTypeMatchingSwagger {
 
     }
 
-    private static JSONObject deepObject(JSONObject json, Field declaredField) {
+    private static JSONObject deepObject(JSONObject json, Field declaredField,Type... t ) {
 		String desc = declaredField.getName();
 		if (declaredField.isAnnotationPresent(ParamDesc.class)) {
 			ParamDesc annotation = declaredField.getAnnotation(ParamDesc.class);
@@ -405,7 +433,8 @@ public class RequestTypeMatchingSwagger {
 								refs.put("$ref", "#/definitions/" + actualTypeArgument.getSimpleName());
 							}
 							REF.add(actualTypeArgument.getName());
-							return json;
+
+							// return json;
 						}
 						filedObject.put(field.getName(), deepObject(Factory.get(), field));
 					}
@@ -434,7 +463,7 @@ public class RequestTypeMatchingSwagger {
 				json.put("description", desc);
 			}
 			return json;
-		} else if (checkJavaType(declaredField.getType().getTypeName())) {
+		} else if (t.length == 0  && checkJavaType(declaredField.getType().getTypeName())) {
 			// 常规类型
 			json.put("type", convertType(declaredField.getType().getSimpleName()));
 			json.put("description", desc);
@@ -442,6 +471,9 @@ public class RequestTypeMatchingSwagger {
 		} else {
 			// 修复 https://github.com/NoBugBoy/YDoc/issues/1
 			Class<?> declaringClass = declaredField.getType();
+			if( t.length > 0 ){
+				declaringClass = typeToClass(t[0]);
+			}
 			if (REF.contains(declaringClass.getName())) {
 				if (declaringClass.getName().contains("$")) {
 					json.put("$ref", "#/definitions/" + declaringClass.getName().substring(declaringClass.getName().lastIndexOf(".") + 1).replace("$", "."));
@@ -454,7 +486,8 @@ public class RequestTypeMatchingSwagger {
 			// json.put("type", RequestBodyType.OBJECT.type);
 			JSONObject objectTypeJSON = Factory.get();
 			for (Field field : getAllFiled(declaringClass)) {
-				objectTypeJSON.put(field.getName(), deepObject(Factory.get(), field));
+				//final 禁序列化和 class不处理
+					objectTypeJSON.put(field.getName(), deepObject(Factory.get(), field));
 			}
 			if (!declaringClass.getName().toLowerCase().contains("json")) {
 				JSONObject jsonObject = Factory.get();
@@ -528,4 +561,29 @@ public class RequestTypeMatchingSwagger {
 		Field[] fields = new Field[fieldList.size()];
 		return fieldList.toArray(fields);
 	}
+	private static Class<?> typeToClass(Type src) {
+		Class<?> result = null;
+		// 如果src是Class类型的实例则直接进行强制类型转换
+		if (src instanceof Class) {
+			result = (Class<?>) src;
+			// 如果src是参数类型则获取其原始类型Class对象；
+		} else if (src instanceof ParameterizedType) {
+			result = (Class<?>) ((ParameterizedType) src).getRawType();
+			//
+		} else if (src instanceof GenericArrayType) {
+			Type componentType = ((GenericArrayType) src).getGenericComponentType();
+			if (componentType instanceof Class) {
+				result = Array.newInstance((Class<?>) componentType, 0).getClass();
+			} else {
+				Class<?> componentClass = typeToClass(componentType);
+				result = Array.newInstance(componentClass, 0).getClass();
+			}
+		}
+		if (result == null) {
+			result = Object.class;
+		}
+		return result;
+	}
 }
+
+

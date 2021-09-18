@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
@@ -135,7 +136,7 @@ public class ScanControllerSwagger
     public void afterPropertiesSet() throws Exception {
 	if (propertiesConfig.isEnable()) {
 	    if (!propertiesConfig.isSwaggerNative()) {
-		log.info(" >>> YDoc Sync Api start !<<<");
+	    printBanner();
 		scan();
 		log.info(" >>> YDoc Sync Api Successful !<<<");
 	    }
@@ -146,7 +147,7 @@ public class ScanControllerSwagger
     public void run(String... args) throws Exception {
 	if (propertiesConfig.isSwaggerNative() && documentationCache != null && map != null) {
 	    // 这里暂时只考虑一个group的时候，因为大多数情况都是只有一个default
-	    log.info(" >>> YDoc Sync Api start !<<<");
+		printBanner();
 	    if (documentationCache.all().values().size() > 0) {
 		Documentation documentation = new ArrayList<>(documentationCache.all().values()).get(0);
 		io.swagger.models.Swagger swagger = this.map.mapDocumentation(documentation);
@@ -160,7 +161,6 @@ public class ScanControllerSwagger
 	    } else {
 		log.warn("未发现任何Api,可能未配置Swagger2 Config....");
 	    }
-	    log.info(" >>> YDoc Sync Api Successful !<<<");
 	}
 	// access调用链
 	if (access()) {
@@ -181,4 +181,14 @@ public class ScanControllerSwagger
 	return StringUtils.hasText(propertiesConfig.getYapiUserEmail())
 		&& StringUtils.hasText(propertiesConfig.getYapiUserPassword());
     }
+    private void printBanner(){
+		System.out.println("__      __  ______       ____       ____  ");
+		System.out.println(") \\    / ( (_  __ \\     / __ \\     / ___) ");
+		System.out.println(" \\ \\  / /    ) ) \\ \\   / /  \\ \\   / /     ");
+		System.out.println("  \\ \\/ /    ( (   ) ) ( ()  () ) ( (      ");
+		System.out.println("   \\  /      ) )  ) ) ( ()  () ) ( (      ");
+		System.out.println("   \\  /      ) )  ) ) ( ()  () ) ( (      ");
+		System.out.println("    )(      / /__/ /   \\ \\__/ /   \\ \\___  ");
+		System.out.println("   /__\\    (______/     \\____/     \\____)");
+	}
 }
