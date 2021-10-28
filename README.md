@@ -52,11 +52,12 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，无Ui界面，�
 6. 1.0.6修复bug
 7. 1.0.7修复匿名内部类解析问题 参考 https://juejin.cn/post/6994640102974554143
 8. 1.0.8修复issue问题https://github.com/NoBugBoy/YDoc/issues/8 tag： https://github.com/NoBugBoy/YDoc/releases/tag/1.0.8
+9. 1.0.9修复url被覆盖问题，缩小banner
 ```xml 
        <dependency>
             <groupId>com.github.nobugboy</groupId>
             <artifactId>ydoc-spring-boot-starter</artifactId>
-            <version>1.0.8</version>
+            <version>1.0.9</version>
         </dependency>
 ```
 
