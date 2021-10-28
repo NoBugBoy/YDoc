@@ -185,7 +185,12 @@ public class RequestTypeMatchingSwagger {
     private static void get(String name, String path, JSONObject api, Method method, String outPath, String tag) {
 	// 方法对象
 	JSONObject apiMethod = Factory.get();
-	api.put(outPath + path, apiMethod);
+	if(api.containsKey(outPath + path)){
+		//路径已经存在
+		apiMethod = (JSONObject)api.get(outPath + path);
+	}else{
+		api.put(outPath + path, apiMethod);
+	}
 	// body
 	JSONObject content = Factory.get();
 	apiMethod.put("get", content);
@@ -273,7 +278,12 @@ public class RequestTypeMatchingSwagger {
     private static void post(String name, String path, JSONObject api, Method method, String outPath, String tag) {
 	// 方法对象
 	JSONObject apiMethod = Factory.get();
-	api.put(outPath + path, apiMethod);
+	if(api.containsKey(outPath + path)){
+		//路径已经存在
+		apiMethod = (JSONObject)api.get(outPath + path);
+	}else{
+		api.put(outPath + path, apiMethod);
+	}
 	// body
 	JSONObject content = Factory.get();
 	apiMethod.put("post", content);
@@ -293,7 +303,12 @@ public class RequestTypeMatchingSwagger {
     private static void delete(String name, String path, JSONObject api, Method method, String outPath, String tag) {
 	// 方法对象
 	JSONObject apiMethod = Factory.get();
-	api.put(outPath + path, apiMethod);
+	if(api.containsKey(outPath + path)){
+		//路径已经存在
+		apiMethod = (JSONObject)api.get(outPath + path);
+	}else{
+		api.put(outPath + path, apiMethod);
+	}
 	// body
 	JSONObject content = Factory.get();
 	apiMethod.put("delete", content);
@@ -313,7 +328,12 @@ public class RequestTypeMatchingSwagger {
     private static void put(String name, String path, JSONObject api, Method method, String outPath, String tag) {
 	// 方法对象
 	JSONObject apiMethod = Factory.get();
-	api.put(outPath + path, apiMethod);
+	if(api.containsKey(outPath + path)){
+		//路径已经存在
+		apiMethod = (JSONObject)api.get(outPath + path);
+	}else{
+	    api.put(outPath + path, apiMethod);
+	}
 	// body
 	JSONObject content = Factory.get();
 	apiMethod.put("put", content);

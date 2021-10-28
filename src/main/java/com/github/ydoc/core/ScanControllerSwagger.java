@@ -62,6 +62,7 @@ public class ScanControllerSwagger
 	swagger.setBasePath(basePath.get());
 	List<Swagger.Tag> tags = new ArrayList<>();
 	JSONObject paths = Factory.get();
+	swagger.setPaths(paths);
 	for (Map.Entry<String, Object> object : restControllerMap.entrySet()) {
 	    // 组装swagger-api
 	    Class<?> aClass = object.getValue().getClass();
@@ -84,7 +85,7 @@ public class ScanControllerSwagger
 		RequestTypeMatchingSwagger.matching(paths, method, outPath, object.getKey());
 	    }
 	}
-	swagger.setPaths(paths);
+
 	swagger.setTags(tags);
 	Factory.json = JSON.toJSONString(swagger);
 
@@ -182,13 +183,10 @@ public class ScanControllerSwagger
 		&& StringUtils.hasText(propertiesConfig.getYapiUserPassword());
     }
     private void printBanner(){
-		System.out.println("__      __  ______       ____       ____  ");
-		System.out.println(") \\    / ( (_  __ \\     / __ \\     / ___) ");
-		System.out.println(" \\ \\  / /    ) ) \\ \\   / /  \\ \\   / /     ");
-		System.out.println("  \\ \\/ /    ( (   ) ) ( ()  () ) ( (      ");
-		System.out.println("   \\  /      ) )  ) ) ( ()  () ) ( (      ");
-		System.out.println("   \\  /      ) )  ) ) ( ()  () ) ( (      ");
-		System.out.println("    )(      / /__/ /   \\ \\__/ /   \\ \\___  ");
-		System.out.println("   /__\\    (______/     \\____/     \\____)");
+		System.out.println(" _  _  ____  _____  ___ ");
+		System.out.println("( \\/ )(  _ \\(  _  )/ __)");
+		System.out.println(" \\  /  )(_) ))(_)(( (__ ");
+		System.out.println(" (__) (____/(_____)\\___)");
+		System.out.println("                v1.0.9   ");
 	}
 }

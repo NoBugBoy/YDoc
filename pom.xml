@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.github.nobugboy</groupId>
     <artifactId>ydoc-spring-boot-starter</artifactId>
-    <version>1.0.8</version>
+    <version>1.0.9</version>
     <name>ydoc-spring-boot-starter</name>
     <packaging>jar</packaging>
     <description>YDoc一款低侵入性、简洁并同时支持SwaggerUi和YApi的文档生成器</description>
