@@ -167,14 +167,25 @@ public class RequestTypeMatchingSwagger {
 			jsonObject.put("type", RequestBodyType.OBJECT.type);
 			jsonObject.put("title", returnType.getSimpleName());
 			if (returnType.getName().contains("$")) {
-				// 处理匿名内部类
-				Factory.definitions.put(
-					returnType.getName().substring(returnType.getName().lastIndexOf(".") + 1).replace("$", "."), jsonObject);
-				schema.put("$ref", "#/definitions/" + returnType.getName().substring(returnType.getName().lastIndexOf(".") + 1).replace("$", "."));
+				if(objectType!=null){
+					// 处理匿名内部类
+					Factory.definitions.put(
+						returnType.getName().substring(returnType.getName().lastIndexOf(".") + 1).replace("$", ".") + "<"+objectType.getTypeName()+">", jsonObject);
+					schema.put("$ref", "#/definitions/" + returnType.getName().substring(returnType.getName().lastIndexOf(".") + 1).replace("$", ".") + "<"+objectType.getTypeName()+">");
+				}else{
+					Factory.definitions.put(
+						returnType.getName().substring(returnType.getName().lastIndexOf(".") + 1).replace("$", "."), jsonObject);
+				}
 			} else {
-				Factory.definitions.put(returnType.getSimpleName(), jsonObject);
-				schema.put("$ref", "#/definitions/" + returnType.getSimpleName());
+				if(objectType!=null){
+					Factory.definitions.put(returnType.getSimpleName() +  "<"+objectType.getTypeName()+">", jsonObject);
+					schema.put("$ref", "#/definitions/" + returnType.getSimpleName() +  "<"+objectType.getTypeName()+">");
+				}else{
+					Factory.definitions.put(returnType.getSimpleName(), jsonObject);
+					schema.put("$ref", "#/definitions/" + returnType.getSimpleName());
+				}
 			}
+
 		} else {
 			schema.put("properties", objectTypeJSON);
 		}
@@ -515,11 +526,10 @@ public class RequestTypeMatchingSwagger {
 				jsonObject.put("type", RequestBodyType.OBJECT.type);
 				jsonObject.put("title", declaringClass.getSimpleName());
 				if (declaringClass.getName().contains("$")) {
-					// 处理匿名内部类
-					Factory.definitions.put(
-						declaringClass.getName().substring(declaringClass.getName().lastIndexOf(".") + 1).replace("$", "."), jsonObject);
+						Factory.definitions.put(
+							declaringClass.getName().substring(declaringClass.getName().lastIndexOf(".") + 1).replace("$", "."), jsonObject);
 					json.put("$ref", "#/definitions/" + declaringClass.getName().substring(declaringClass.getName().lastIndexOf(".") + 1).replace("$", "."));
-				} else {
+				} else { ;
 					Factory.definitions.put(declaringClass.getSimpleName(), jsonObject);
 					json.put("$ref", "#/definitions/" + declaringClass.getSimpleName());
 				}
