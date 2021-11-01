@@ -43,7 +43,7 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，无Ui界面，�
 
 
 如果不能直接依赖说明还没有同步到中央maven（1.0.2才支持Swagger-bootstrap-ui ）
-### 版本说明
+### YDoc版本更新说明
 1. 1.0.1支持YDoc方式生成YApi文档
 2. 1.0.2支持YDoc方式生成Swagger文档
 3. 1.0.3支持Swagger原生注解生成Swagger文档,并同步导入到YApi（**方便已经使用了swagger原生注解，但是还想快速导入YApi的用户，拒绝使用YApi轮训导入从我做起**）
@@ -51,13 +51,14 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，无Ui界面，�
 5. 1.0.5支持非native模式生成swagger文档，邮件提醒，web测试报告展示
 6. 1.0.6修复bug
 7. 1.0.7修复匿名内部类解析问题 参考 https://juejin.cn/post/6994640102974554143
-8. 1.0.8修复issue问题https://github.com/NoBugBoy/YDoc/issues/8 tag： https://github.com/NoBugBoy/YDoc/releases/tag/1.0.8
+8. 1.0.8修复issue问题 https://github.com/NoBugBoy/YDoc/issues/8 tag： https://github.com/NoBugBoy/YDoc/releases/tag/1.0.8
 9. 1.0.9修复url被覆盖问题，缩小banner
+10. 1.1.0修复返回值泛型被覆盖的问题 https://github.com/NoBugBoy/YDoc/issues/12
 ```xml 
        <dependency>
             <groupId>com.github.nobugboy</groupId>
             <artifactId>ydoc-spring-boot-starter</artifactId>
-            <version>1.0.9</version>
+            <version>1.1.0</version>
         </dependency>
 ```
 
