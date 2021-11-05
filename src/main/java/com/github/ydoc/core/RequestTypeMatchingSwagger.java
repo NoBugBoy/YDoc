@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ydoc.anno.ParamDesc;
 import com.github.ydoc.anno.ParamIgnore;
+import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 /**
  * author NoBugBoY description 匹配方法类型 create 2021-04-23 12:25
@@ -103,32 +104,73 @@ public class RequestTypeMatchingSwagger {
 	if (returnType.equals(List.class) || returnType.equals(Set.class)) {
 	    schema.put("type", "array");
 	    Type genericReturnType = method.getGenericReturnType();
-	    if (genericReturnType instanceof ParameterizedType) {
-		ParameterizedType genericReturnType1 = (ParameterizedType) genericReturnType;
-		for (Type actualTypeArgument : genericReturnType1.getActualTypeArguments()) {
-		    if (checkJavaType(actualTypeArgument.getTypeName())) {
-			JSONObject jsonObject = Factory.get();
-			properties.put(actualTypeArgument.getTypeName(), jsonObject);
-			jsonObject.put("description", desc);
-			jsonObject.put("type", convertType(actualTypeArgument.getTypeName()));
-			schema.put("properties", properties);
-		    } else {
-			try {
-			    Class<?> clazz = Class.forName(actualTypeArgument.getTypeName());
 
-			    for (Field declaredField : getAllFiled(clazz)) {
-				if (Modifier.isFinal(declaredField.getModifiers())) {
-				    // final不处理
-				    continue;
-				}
-				properties.put(declaredField.getName(), deepObject(Factory.get(), declaredField));
-			    }
-			    schema.put("properties", properties);
-			} catch (ClassNotFoundException e) {
-			    e.printStackTrace();
-			}
+	    ParameterizedType pt = (ParameterizedType) genericReturnType;
+	    Class<?> actualTypeArgument = (Class<?>) pt.getActualTypeArguments()[0];
+	    json.put("type", RequestBodyType.ARRAY.type);
+	    if (checkJavaType(actualTypeArgument.getTypeName())) {
+		// 如果是普通类型
+		JSONObject jsonObject = Factory.get();
+		jsonObject.put("type", convertType(actualTypeArgument.getTypeName()));
+		schema.put("items", jsonObject);
+	    } else {
+		// 如果是对象
+		JSONObject jsonObject = Factory.get();
+		jsonObject.put("type", RequestBodyType.OBJECT.type);
+		JSONObject filedObject = Factory.get();
+
+		for (Field field : actualTypeArgument.getDeclaredFields()) {
+		    if (Modifier.isFinal(field.getModifiers())) {
+			// final不处理
+			continue;
 		    }
+		    if (actualTypeArgument.equals(field.getType())) {
+			break;
+		    }
+		    if (actualTypeArgument.isAssignableFrom(field.getType())) {
+			// User 里有 list<User> 会死递归
+			break;
+		    } else {
+			// 对象嵌套
+			if (!REF.contains(actualTypeArgument.getName()) && !checkJavaType(field.getType().getName())) {
+			    JSONObject refs = Factory.get();
+			    refs.put("type", RequestBodyType.OBJECT.type);
+			    json.put("items", refs);
+			    if (actualTypeArgument.getName().contains("$")) {
+				refs.put("$ref",
+					"#/definitions/" + actualTypeArgument.getName()
+						.substring(actualTypeArgument.getName().lastIndexOf(".") + 1)
+						.replace("$", "."));
+			    } else {
+				refs.put("$ref", "#/definitions/" + actualTypeArgument.getSimpleName());
+			    }
+			    REF.add(actualTypeArgument.getName());
+
+			}
+			filedObject.put(field.getName(), deepObject(Factory.get(), field));
+		    }
+
 		}
+
+		schema.put("items", jsonObject);
+		JSONObject clone = (JSONObject) filedObject.clone();
+		clone.remove("$ref");
+		JSONObject innerRef = new JSONObject();
+		innerRef.put("properties", clone);
+		innerRef.put("type", RequestBodyType.OBJECT.type);
+
+		if (actualTypeArgument.getName().contains("$")) {
+		    // 处理匿名内部类
+		    Factory.definitions.putIfAbsent(actualTypeArgument.getName()
+			    .substring(actualTypeArgument.getName().lastIndexOf(".") + 1).replace("$", "."), innerRef);
+		    jsonObject.put("$ref", "#/definitions/" + actualTypeArgument.getName()
+			    .substring(actualTypeArgument.getName().lastIndexOf(".") + 1).replace("$", "."));
+		} else {
+		    Factory.definitions.putIfAbsent(actualTypeArgument.getSimpleName(), innerRef);
+		    jsonObject.put("$ref", "#/definitions/" + actualTypeArgument.getSimpleName());
+		}
+
+		schema.put("description", desc);
 	    }
 	} else if (checkJavaType(returnType.getName())) {
 	    schema.put("type", convertType(returnType.getSimpleName()));
@@ -138,57 +180,63 @@ public class RequestTypeMatchingSwagger {
 	    jsonObject.put("type", RequestBodyType.of(returnType.getSimpleName()).type);
 	    schema.put("properties", properties);
 	} else {
-		//判断是不是泛型
-		Type genericReturnType = method.getGenericReturnType();
-		Type objectType = null;
-		if (genericReturnType instanceof ParameterizedType){
-			//有泛型
-			//多泛型
-			Type[] actualTypeArguments = ((ParameterizedType)genericReturnType).getActualTypeArguments();
-			//暂时只处理单泛型，将该泛型指向object上
-			if (actualTypeArguments.length > 0){
-				objectType = actualTypeArguments[0];
-			}
+	    // 判断是不是泛型
+	    Type genericReturnType = method.getGenericReturnType();
+	    Type objectType = null;
+	    if (genericReturnType instanceof ParameterizedType) {
+		// 有泛型
+		// 多泛型
+		Type[] actualTypeArguments = ((ParameterizedType) genericReturnType).getActualTypeArguments();
+		// 暂时只处理单泛型，将该泛型指向object上
+		if (actualTypeArguments.length > 0) {
+		    objectType = actualTypeArguments[0];
 		}
-		JSONObject objectTypeJSON = Factory.get();
-		for (Field declaredField : getAllFiled(returnType)) {
-			//临时支持单泛型返回值 https://github.com/NoBugBoy/YDoc/issues/8
-			if(objectType != null && "Object".equals(declaredField.getType().getSimpleName())){
-				//将该类型指向给Object
-				objectTypeJSON.put(declaredField.getName(), deepObject(Factory.get(), declaredField,objectType));
-			}else{
-				objectTypeJSON.put(declaredField.getName(), deepObject(Factory.get(), declaredField));
-			}
-
-		}
-		if (!returnType.getName().toLowerCase().contains("json")) {
-			JSONObject jsonObject = Factory.get();
-			jsonObject.put("properties", objectTypeJSON);
-			jsonObject.put("type", RequestBodyType.OBJECT.type);
-			jsonObject.put("title", returnType.getSimpleName());
-			if (returnType.getName().contains("$")) {
-				if(objectType!=null){
-					// 处理匿名内部类
-					Factory.definitions.put(
-						returnType.getName().substring(returnType.getName().lastIndexOf(".") + 1).replace("$", ".") + "<"+objectType.getTypeName()+">", jsonObject);
-					schema.put("$ref", "#/definitions/" + returnType.getName().substring(returnType.getName().lastIndexOf(".") + 1).replace("$", ".") + "<"+objectType.getTypeName()+">");
-				}else{
-					Factory.definitions.put(
-						returnType.getName().substring(returnType.getName().lastIndexOf(".") + 1).replace("$", "."), jsonObject);
-				}
-			} else {
-				if(objectType!=null){
-					Factory.definitions.put(returnType.getSimpleName() +  "<"+objectType.getTypeName()+">", jsonObject);
-					schema.put("$ref", "#/definitions/" + returnType.getSimpleName() +  "<"+objectType.getTypeName()+">");
-				}else{
-					Factory.definitions.put(returnType.getSimpleName(), jsonObject);
-					schema.put("$ref", "#/definitions/" + returnType.getSimpleName());
-				}
-			}
-
+	    }
+	    JSONObject objectTypeJSON = Factory.get();
+	    for (Field declaredField : getAllFiled(returnType)) {
+		// 临时支持单泛型返回值 https://github.com/NoBugBoy/YDoc/issues/8
+		if (objectType != null && "Object".equals(declaredField.getType().getSimpleName())) {
+		    // 将该类型指向给Object
+		    objectTypeJSON.put(declaredField.getName(), deepObject(Factory.get(), declaredField, objectType));
 		} else {
-			schema.put("properties", objectTypeJSON);
+		    objectTypeJSON.put(declaredField.getName(), deepObject(Factory.get(), declaredField));
 		}
+
+	    }
+	    if (!returnType.getName().toLowerCase().contains("json")) {
+		JSONObject jsonObject = Factory.get();
+		jsonObject.put("properties", objectTypeJSON);
+		jsonObject.put("type", RequestBodyType.OBJECT.type);
+		jsonObject.put("title", returnType.getSimpleName());
+		if (returnType.getName().contains("$")) {
+		    if (objectType != null) {
+			// 处理匿名内部类
+			Factory.definitions
+				.put(returnType.getName().substring(returnType.getName().lastIndexOf(".") + 1)
+					.replace("$", ".") + "<" + objectType.getTypeName() + ">", jsonObject);
+			schema.put("$ref",
+				"#/definitions/" + returnType.getName()
+					.substring(returnType.getName().lastIndexOf(".") + 1).replace("$", ".") + "<"
+					+ objectType.getTypeName() + ">");
+		    } else {
+			Factory.definitions.put(returnType.getName()
+				.substring(returnType.getName().lastIndexOf(".") + 1).replace("$", "."), jsonObject);
+		    }
+		} else {
+		    if (objectType != null) {
+			Factory.definitions.put(returnType.getSimpleName() + "<" + objectType.getTypeName() + ">",
+				jsonObject);
+			schema.put("$ref",
+				"#/definitions/" + returnType.getSimpleName() + "<" + objectType.getTypeName() + ">");
+		    } else {
+			Factory.definitions.put(returnType.getSimpleName(), jsonObject);
+			schema.put("$ref", "#/definitions/" + returnType.getSimpleName());
+		    }
+		}
+
+	    } else {
+		schema.put("properties", objectTypeJSON);
+	    }
 	}
 
     }
@@ -196,11 +244,11 @@ public class RequestTypeMatchingSwagger {
     private static void get(String name, String path, JSONObject api, Method method, String outPath, String tag) {
 	// 方法对象
 	JSONObject apiMethod = Factory.get();
-	if(api.containsKey(outPath + path)){
-		//路径已经存在
-		apiMethod = (JSONObject)api.get(outPath + path);
-	}else{
-		api.put(outPath + path, apiMethod);
+	if (api.containsKey(outPath + path)) {
+	    // 路径已经存在
+	    apiMethod = (JSONObject) api.get(outPath + path);
+	} else {
+	    api.put(outPath + path, apiMethod);
 	}
 	// body
 	JSONObject content = Factory.get();
@@ -289,11 +337,11 @@ public class RequestTypeMatchingSwagger {
     private static void post(String name, String path, JSONObject api, Method method, String outPath, String tag) {
 	// 方法对象
 	JSONObject apiMethod = Factory.get();
-	if(api.containsKey(outPath + path)){
-		//路径已经存在
-		apiMethod = (JSONObject)api.get(outPath + path);
-	}else{
-		api.put(outPath + path, apiMethod);
+	if (api.containsKey(outPath + path)) {
+	    // 路径已经存在
+	    apiMethod = (JSONObject) api.get(outPath + path);
+	} else {
+	    api.put(outPath + path, apiMethod);
 	}
 	// body
 	JSONObject content = Factory.get();
@@ -314,11 +362,11 @@ public class RequestTypeMatchingSwagger {
     private static void delete(String name, String path, JSONObject api, Method method, String outPath, String tag) {
 	// 方法对象
 	JSONObject apiMethod = Factory.get();
-	if(api.containsKey(outPath + path)){
-		//路径已经存在
-		apiMethod = (JSONObject)api.get(outPath + path);
-	}else{
-		api.put(outPath + path, apiMethod);
+	if (api.containsKey(outPath + path)) {
+	    // 路径已经存在
+	    apiMethod = (JSONObject) api.get(outPath + path);
+	} else {
+	    api.put(outPath + path, apiMethod);
 	}
 	// body
 	JSONObject content = Factory.get();
@@ -339,10 +387,10 @@ public class RequestTypeMatchingSwagger {
     private static void put(String name, String path, JSONObject api, Method method, String outPath, String tag) {
 	// 方法对象
 	JSONObject apiMethod = Factory.get();
-	if(api.containsKey(outPath + path)){
-		//路径已经存在
-		apiMethod = (JSONObject)api.get(outPath + path);
-	}else{
+	if (api.containsKey(outPath + path)) {
+	    // 路径已经存在
+	    apiMethod = (JSONObject) api.get(outPath + path);
+	} else {
 	    api.put(outPath + path, apiMethod);
 	}
 	// body
@@ -402,151 +450,136 @@ public class RequestTypeMatchingSwagger {
 
     }
 
-    private static JSONObject deepObject(JSONObject json, Field declaredField,Type... t ) {
-		String desc = declaredField.getName();
-		if (declaredField.isAnnotationPresent(ParamDesc.class)) {
-			ParamDesc annotation = declaredField.getAnnotation(ParamDesc.class);
-			desc = annotation.value();
-		}
-		if (declaredField.getType().isEnum()) {
-			// 常规类型
-			json.put("type", "integer");
-			Object[]    enumConstants = declaredField.getType().getEnumConstants();
-			Set<String> jsonArray     = new HashSet<>();
-			for (Object enumConstant : enumConstants) {
-				jsonArray.add(enumConstant.toString());
-			}
-			json.put("description", JSON.toJSONString(jsonArray));
-			return json;
-		}
-		if (declaredField.getType().equals(List.class) || declaredField.getType().equals(Set.class)) {
-			Type genericType = declaredField.getGenericType();
-
-			ParameterizedType pt                 = (ParameterizedType)genericType;
-			Class<?>          actualTypeArgument = (Class<?>)pt.getActualTypeArguments()[0];
-			json.put("type", RequestBodyType.ARRAY.type);
-			if (checkJavaType(actualTypeArgument.getTypeName())) {
-				// 如果是普通类型
-				JSONObject jsonObject = Factory.get();
-				jsonObject.put("type", convertType(actualTypeArgument.getTypeName()));
-				jsonObject.put("description", desc);
-				json.put("items", jsonObject);
-				return json;
-			} else {
-				// 如果是对象
-				JSONObject jsonObject = Factory.get();
-				jsonObject.put("type", RequestBodyType.OBJECT.type);
-				JSONObject filedObject = Factory.get();
-
-				for (Field field : actualTypeArgument.getDeclaredFields()) {
-					if (Modifier.isFinal(field.getModifiers())) {
-						// final不处理
-						continue;
-					}
-					if (actualTypeArgument.equals(field.getType())) {
-						break;
-					}
-					if (field.getType().equals(declaredField.getType())) {
-						// User 里有 list<User> 会死递归
-						break;
-					} else {
-						// 对象嵌套
-						if (!REF.contains(actualTypeArgument.getName()) && !checkJavaType(field.getType().getName())) {
-							JSONObject refs = Factory.get();
-							refs.put("type", RequestBodyType.OBJECT.type);
-							json.put("items", refs);
-							if (actualTypeArgument.getName().contains("$")) {
-								refs.put("$ref",
-									"#/definitions/" + actualTypeArgument.getName()
-										.substring(actualTypeArgument.getName().lastIndexOf(".") + 1)
-										.replace("$", "."));
-							} else {
-								refs.put("$ref", "#/definitions/" + actualTypeArgument.getSimpleName());
-							}
-							REF.add(actualTypeArgument.getName());
-
-							// return json;
-						}
-						filedObject.put(field.getName(), deepObject(Factory.get(), field));
-					}
-
-				}
-
-				json.put("items", jsonObject);
-				JSONObject clone = (JSONObject) filedObject.clone();
-				clone.remove("$ref");
-				JSONObject innerRef = new JSONObject();
-				innerRef.put("properties", clone);
-				innerRef.put("type", RequestBodyType.OBJECT.type);
-
-				if (actualTypeArgument.getName().contains("$")) {
-					// 处理匿名内部类
-					Factory.definitions.putIfAbsent(
-						actualTypeArgument.getName().substring(actualTypeArgument.getName().lastIndexOf(".") + 1)
-							.replace("$", "."), innerRef);
-					jsonObject.put("$ref", "#/definitions/" + actualTypeArgument.getName()
-						.substring(actualTypeArgument.getName().lastIndexOf(".") + 1).replace("$", "."));
-				} else {
-					Factory.definitions.putIfAbsent(actualTypeArgument.getSimpleName(), innerRef);
-					jsonObject.put("$ref", "#/definitions/" + actualTypeArgument.getSimpleName());
-				}
-
-				json.put("description", desc);
-			}
-			return json;
-		} else if (t.length == 0  && checkJavaType(declaredField.getType().getTypeName())) {
-			// 常规类型
-			json.put("type", convertType(declaredField.getType().getSimpleName()));
-			json.put("description", desc);
-			return json;
-		} else {
-			// 修复 https://github.com/NoBugBoy/YDoc/issues/1
-			Class<?> declaringClass = declaredField.getType();
-			if( t.length > 0 ){
-				declaringClass = typeToClass(t[0]);
-			}
-			if (REF.contains(declaringClass.getName())) {
-				if (declaringClass.getName().contains("$")) {
-					json.put("$ref", "#/definitions/" + declaringClass.getName().substring(declaringClass.getName().lastIndexOf(".") + 1).replace("$", "."));
-				} else {
-					json.put("$ref", "#/definitions/" + declaringClass.getSimpleName());
-				}
-				return json;
-			}
-			REF.add(declaringClass.getName());
-			// json.put("type", RequestBodyType.OBJECT.type);
-			JSONObject objectTypeJSON = Factory.get();
-			for (Field field : getAllFiled(declaringClass)) {
-				//final 禁序列化和 class不处理
-					objectTypeJSON.put(field.getName(), deepObject(Factory.get(), field));
-			}
-			if (!declaringClass.getName().toLowerCase().contains("json")) {
-				JSONObject jsonObject = Factory.get();
-				jsonObject.put("properties", objectTypeJSON);
-				jsonObject.put("type", RequestBodyType.OBJECT.type);
-				jsonObject.put("title", declaringClass.getSimpleName());
-				if (declaringClass.getName().contains("$")) {
-						Factory.definitions.put(
-							declaringClass.getName().substring(declaringClass.getName().lastIndexOf(".") + 1).replace("$", "."), jsonObject);
-					json.put("$ref", "#/definitions/" + declaringClass.getName().substring(declaringClass.getName().lastIndexOf(".") + 1).replace("$", "."));
-				} else { ;
-					Factory.definitions.put(declaringClass.getSimpleName(), jsonObject);
-					json.put("$ref", "#/definitions/" + declaringClass.getSimpleName());
-				}
-
-			} else {
-				json.put("properties", objectTypeJSON);
-			}
-
-			json.put("description", desc);
-			return json;
-		}
-
+    private static JSONObject deepObject(JSONObject json, Field declaredField, Type... t) {
+	String desc = declaredField.getName();
+	if (declaredField.isAnnotationPresent(ParamDesc.class)) {
+	    ParamDesc annotation = declaredField.getAnnotation(ParamDesc.class);
+	    desc = annotation.value();
 	}
+	if (declaredField.getType().isEnum()) {
+	    // 常规类型
+	    json.put("type", "integer");
+	    Object[] enumConstants = declaredField.getType().getEnumConstants();
+	    Set<String> jsonArray = new HashSet<>();
+	    for (Object enumConstant : enumConstants) {
+		jsonArray.add(enumConstant.toString());
+	    }
+	    json.put("description", JSON.toJSONString(jsonArray));
+	    return json;
+	}
+	if (declaredField.getType().equals(List.class) || declaredField.getType().equals(Set.class)) {
+	    Type genericType = declaredField.getGenericType();
+	    ParameterizedType pt = (ParameterizedType) genericType;
+	    Class<?> actualTypeArgument = (Class<?>) pt.getActualTypeArguments()[0];
+	    json.put("type", RequestBodyType.ARRAY.type);
+	    if (checkJavaType(actualTypeArgument.getTypeName())) {
+		// 如果是普通类型
+		JSONObject jsonObject = Factory.get();
+		jsonObject.put("type", convertType(actualTypeArgument.getTypeName()));
+		jsonObject.put("description", desc);
+		json.put("items", jsonObject);
+		return json;
+	    } else {
+		// 如果是对象
+		JSONObject jsonObject = Factory.get();
+		jsonObject.put("type", RequestBodyType.OBJECT.type);
+		JSONObject filedObject = Factory.get();
+
+		for (Field field : actualTypeArgument.getDeclaredFields()) {
+		    if (Modifier.isFinal(field.getModifiers())) {
+			// final不处理
+			continue;
+		    }
+		    if (actualTypeArgument.equals(field.getType())) {
+			break;
+		    } else {
+			filedObject.put(field.getName(), deepObject(Factory.get(), field));
+		    }
+
+		}
+
+		json.put("items", jsonObject);
+		JSONObject clone = (JSONObject) filedObject.clone();
+		clone.remove("$ref");
+		JSONObject innerRef = new JSONObject();
+		innerRef.put("properties", clone);
+		innerRef.put("type", RequestBodyType.OBJECT.type);
+
+		if (actualTypeArgument.getName().contains("$")) {
+		    // 处理匿名内部类
+		    Factory.definitions.putIfAbsent(actualTypeArgument.getName()
+			    .substring(actualTypeArgument.getName().lastIndexOf(".") + 1).replace("$", "."), innerRef);
+		    jsonObject.put("$ref", "#/definitions/" + actualTypeArgument.getName()
+			    .substring(actualTypeArgument.getName().lastIndexOf(".") + 1).replace("$", "."));
+		} else {
+		    Factory.definitions.putIfAbsent(actualTypeArgument.getSimpleName(), innerRef);
+		    jsonObject.put("$ref", "#/definitions/" + actualTypeArgument.getSimpleName());
+		}
+
+		json.put("description", desc);
+	    }
+	    return json;
+	} else if (t.length == 0 && checkJavaType(declaredField.getType().getTypeName())) {
+	    // 常规类型
+	    json.put("type", convertType(declaredField.getType().getSimpleName()));
+	    json.put("description", desc);
+	    return json;
+	} else {
+	    // 修复 https://github.com/NoBugBoy/YDoc/issues/1
+	    Class<?> declaringClass = declaredField.getType();
+	    if (t.length > 0) {
+		if (t[0] instanceof ParameterizedType) {
+		    ParameterizedType pt = (ParameterizedType) t[0];
+		    declaringClass = (Class<?>) pt.getActualTypeArguments()[0];
+		} else if (t[0] instanceof Class<?>) {
+		    declaringClass = (Class<?>) t[0];
+		} else {
+		    declaringClass = typeToClass(t[0]);
+		}
+	    }
+	    if (REF.contains(declaringClass.getName())) {
+		if (declaringClass.getName().contains("$")) {
+		    json.put("$ref", "#/definitions/" + declaringClass.getName()
+			    .substring(declaringClass.getName().lastIndexOf(".") + 1).replace("$", "."));
+		} else {
+		    json.put("$ref", "#/definitions/" + declaringClass.getSimpleName());
+		}
+		return json;
+	    }
+	    REF.add(declaringClass.getName());
+	    JSONObject objectTypeJSON = Factory.get();
+	    for (Field field : getAllFiled(declaringClass)) {
+		// final 禁序列化和 class不处理
+		objectTypeJSON.put(field.getName(), deepObject(Factory.get(), field));
+	    }
+	    if (!declaringClass.getName().toLowerCase().contains("json")) {
+		JSONObject jsonObject = Factory.get();
+		jsonObject.put("properties", objectTypeJSON);
+		jsonObject.put("type", RequestBodyType.OBJECT.type);
+		jsonObject.put("title", declaringClass.getSimpleName());
+		if (declaringClass.getName().contains("$")) {
+		    Factory.definitions.put(declaringClass.getName()
+			    .substring(declaringClass.getName().lastIndexOf(".") + 1).replace("$", "."), jsonObject);
+		    json.put("$ref", "#/definitions/" + declaringClass.getName()
+			    .substring(declaringClass.getName().lastIndexOf(".") + 1).replace("$", "."));
+		} else {
+		    Factory.definitions.put(declaringClass.getSimpleName(), jsonObject);
+		    json.put("$ref", "#/definitions/" + declaringClass.getSimpleName());
+		}
+
+	    } else {
+		json.put("properties", objectTypeJSON);
+	    }
+
+	    json.put("description", desc);
+	    return json;
+	}
+
+    }
 
     /**
      * 解决如果不是包装类型不是java开头的问题
-     * 
+     *
      * @param name className
      * @return boolean
      */
@@ -582,38 +615,37 @@ public class RequestTypeMatchingSwagger {
 	return RequestBodyType.of(type).type;
     }
 
-    static Field[] getAllFiled(Class<?> clazz){
-		List<Field> fieldList = new ArrayList<>();
-		while (clazz != null){
-			fieldList.addAll(new ArrayList<>(Arrays.asList(clazz.getDeclaredFields())));
-			clazz = clazz.getSuperclass();
-		}
-		Field[] fields = new Field[fieldList.size()];
-		return fieldList.toArray(fields);
+    static Field[] getAllFiled(Class<?> clazz) {
+	List<Field> fieldList = new ArrayList<>();
+	while (clazz != null) {
+	    fieldList.addAll(new ArrayList<>(Arrays.asList(clazz.getDeclaredFields())));
+	    clazz = clazz.getSuperclass();
 	}
-	private static Class<?> typeToClass(Type src) {
-		Class<?> result = null;
-		// 如果src是Class类型的实例则直接进行强制类型转换
-		if (src instanceof Class) {
-			result = (Class<?>) src;
-			// 如果src是参数类型则获取其原始类型Class对象；
-		} else if (src instanceof ParameterizedType) {
-			result = (Class<?>) ((ParameterizedType) src).getRawType();
-			//
-		} else if (src instanceof GenericArrayType) {
-			Type componentType = ((GenericArrayType) src).getGenericComponentType();
-			if (componentType instanceof Class) {
-				result = Array.newInstance((Class<?>) componentType, 0).getClass();
-			} else {
-				Class<?> componentClass = typeToClass(componentType);
-				result = Array.newInstance(componentClass, 0).getClass();
-			}
-		}
-		if (result == null) {
-			result = Object.class;
-		}
-		return result;
+	Field[] fields = new Field[fieldList.size()];
+	return fieldList.toArray(fields);
+    }
+
+    private static Class<?> typeToClass(Type src) {
+	Class<?> result = null;
+	// 如果src是Class类型的实例则直接进行强制类型转换
+	if (src instanceof Class) {
+	    result = (Class<?>) src;
+	    // 如果src是参数类型则获取其原始类型Class对象；
+	} else if (src instanceof ParameterizedType) {
+	    result = (Class<?>) ((ParameterizedType) src).getRawType();
+	    //
+	} else if (src instanceof GenericArrayType) {
+	    Type componentType = ((GenericArrayType) src).getGenericComponentType();
+	    if (componentType instanceof Class) {
+		result = Array.newInstance((Class<?>) componentType, 0).getClass();
+	    } else {
+		Class<?> componentClass = typeToClass(componentType);
+		result = Array.newInstance(componentClass, 0).getClass();
+	    }
 	}
+	if (result == null) {
+	    result = Object.class;
+	}
+	return result;
+    }
 }
-
-
