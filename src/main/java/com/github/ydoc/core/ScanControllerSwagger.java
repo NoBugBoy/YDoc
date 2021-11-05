@@ -136,7 +136,7 @@ public class ScanControllerSwagger
     public void afterPropertiesSet() throws Exception {
 	if (propertiesConfig.isEnable()) {
 	    if (!propertiesConfig.isSwaggerNative()) {
-	    printBanner();
+		printBanner();
 		scan();
 		log.info(" >>> YDoc Sync Api Successful !<<<");
 	    }
@@ -147,7 +147,7 @@ public class ScanControllerSwagger
     public void run(String... args) throws Exception {
 	if (propertiesConfig.isSwaggerNative() && documentationCache != null && map != null) {
 	    // 这里暂时只考虑一个group的时候，因为大多数情况都是只有一个default
-		printBanner();
+	    printBanner();
 	    if (documentationCache.all().values().size() > 0) {
 		Documentation documentation = new ArrayList<>(documentationCache.all().values()).get(0);
 		io.swagger.models.Swagger swagger = this.map.mapDocumentation(documentation);
@@ -181,11 +181,12 @@ public class ScanControllerSwagger
 	return StringUtils.hasText(propertiesConfig.getYapiUserEmail())
 		&& StringUtils.hasText(propertiesConfig.getYapiUserPassword());
     }
-    private void printBanner(){
-		System.out.println(" _  _  ____  _____  ___ ");
-		System.out.println("( \\/ )(  _ \\(  _  )/ __)");
-		System.out.println(" \\  /  )(_) ))(_)(( (__ ");
-		System.out.println(" (__) (____/(_____)\\___)");
-		System.out.println("                v1.0.9   ");
-	}
+
+    private void printBanner() {
+	System.out.println(" _  _  ____  _____  ___ ");
+	System.out.println("( \\/ )(  _ \\(  _  )/ __)");
+	System.out.println(" \\  /  )(_) ))(_)(( (__ ");
+	System.out.println(" (__) (____/(_____)\\___)");
+	System.out.println("                v1.1.1   ");
+    }
 }
