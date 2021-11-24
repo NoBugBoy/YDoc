@@ -33,9 +33,9 @@ Swagger是基于注解形式生成api文档的工具，对接口的参数，返�
 
 #### 3.YDoc
 
-Ydoc是一款基于spring-boot-starter的依赖库，轻量级，无Ui界面，不依赖注释，少量依赖注解和使用规范，整体依赖于YApi接口可视化平台，可使用YApi的所有特征，与程序部署分离可集中化管理，支持权限控制等，集成快速高效，配置依赖，加上两行配置程序启动时即可自动生成。
+Ydoc是一款基于spring-boot-starter的依赖库，轻量级，不依赖注释，少量依赖注解和使用规范，整体依赖于YApi接口可视化平台，可使用YApi的所有特征，与程序部署分离可集中化管理，支持权限控制等，集成快速高效，配置依赖，加上两行配置程序启动时即可自动生成。
 
-- 优点是可使用YApi平台的特性，侵入性更低，0配置，引入依赖添加配置文件即可。
+- 优点是可使用Swagger和YApi平台的特性，侵入性更低，快速集成，引入依赖配置参数即可，不需要额外配置类插拔更方便。
 - 缺点是少量依赖注解和使用规范，仅支持spring-boot工程
 
 ### 2. YDoc的使用方法（基于YApi版本1.9.2）
@@ -62,20 +62,22 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，无Ui界面，�
 8. 1.0.8修复issue问题 https://github.com/NoBugBoy/YDoc/issues/8 tag： https://github.com/NoBugBoy/YDoc/releases/tag/1.0.8
 9. 1.0.9修复url被覆盖问题，缩小banner
 10. 1.1.0修复返回值泛型被覆盖的问题 https://github.com/NoBugBoy/YDoc/issues/12
-10. 1.1.1修复返回值R<List<T>>解析失败的问题&深层嵌套解析内部属性失败&修复返回值List<T>解析错误
+11. 1.1.1修复返回值R<List<T>>解析失败的问题&深层嵌套解析内部属性失败&修复返回值List<T>解析错误
+12. 1.1.2新增通用公共headers配置，和解析@RequestHeader注解
 
 ```xml 
        <dependency>
             <groupId>com.github.nobugboy</groupId>
             <artifactId>ydoc-spring-boot-starter</artifactId>
-            <version>1.1.1</version>
+            <version>1.1.2</version>
         </dependency>
 ```
 
 | 配置名 | 值 | 是否必须|
 |--|--| -- | 
 | ydoc.token | YApi项目中生成的token |否| 
-| ydoc.host | YApi的url,例http://localhost:3000 |否| 
+| ydoc.host | YApi的url,例http://localhost:3000 |否|
+| ydoc.headers | 配置所有api公共header参数（多个用,分割）|否|
 |ydoc.enable | 程序启动时是否同步到YApi平台 |是|
 | ydoc.print | 程序启动时是否打印离线JSON（可手动导入到YApi或其他文档平台） |否|
 | ydoc.swagger-native |是否启用Swagger原生配置生成文档（方便已经集成了swagger得用户） |否| 
@@ -135,6 +137,7 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，无Ui界面，�
 | @PostMapping |注解中name描述该api的作用 | 
 | @DeleteMapping | 注解中name描述该api的作用 | 
 | @PutMapping | 注解中name描述该api的作用 |
+| @RequestHeader | 注解中name描述该api的作用 |
 
 @ParamDesc与@ParamIgnore为YDoc额外的自有注解，其余为SpringBoot的注解，@ParamDesc用来标识实体中参数的描述，@ParamIgnore用来忽略参数不参与生成文档，如不加参数描述则默认为参数的名称。
 | 注解 | 值 | 
@@ -152,7 +155,7 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，无Ui界面，�
 2. 建议在参数上加@ParamDesc用来描述作用
 3. spring提供的注解再原有开发习惯上加name，用来描述RestController或Api的作用
 4. 如有特殊参数例如Bindingresult，登录的用户实体等使用@ParamIgnore进行忽略
-5. 最好不要对象套对象自己比如U -> List<U> 这种
+5. 最好不要对象套对象自己比如U -> List <U> 这种
 
 ### 7.话外音
 
