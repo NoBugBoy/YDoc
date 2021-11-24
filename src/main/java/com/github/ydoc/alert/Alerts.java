@@ -19,7 +19,7 @@ import java.util.List;
  **/
 @Slf4j
 public class Alerts {
-    private static final String DingUrl = "https://oapi.dingtalk.com/robot/send?access_token=";
+    private static final String DING_URL = "https://oapi.dingtalk.com/robot/send?access_token=";
 
     public static void hookDing(RestTemplate restTemplate, String title, String msg, String host, String accessToken) {
 	JSONObject param = Factory.get();
@@ -34,7 +34,7 @@ public class Alerts {
 	MediaType type = MediaType.parseMediaType("application/json; charset=UTF-8");
 	headers.setContentType(type);
 	HttpEntity<JSONObject> formEntity = new HttpEntity<>(param, headers);
-	restTemplate.postForEntity(DingUrl + accessToken, formEntity, String.class);
+	restTemplate.postForEntity(DING_URL + accessToken, formEntity, String.class);
     }
 
     public static void htmlEmail(JavaMailSender mailSender, String html, String from, List<String> to) {

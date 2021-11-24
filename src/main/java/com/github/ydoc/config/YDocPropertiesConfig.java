@@ -23,6 +23,10 @@ public class YDocPropertiesConfig {
      */
     private String host;
     /**
+     * 所有接口通用header参数
+     */
+    private List<String> headers;
+    /**
      * yapi项目id,在设置中查看(自动化测试时使用)
      */
     private String id;
@@ -74,6 +78,5 @@ public class YDocPropertiesConfig {
      * 是否启用原生Swagger注解来生成api文档 需要配置swagger扫包等config,并且移除相关pom依赖 （YDoc默认为swagger3.0）
      */
     private boolean swaggerNative = false;
-
 
 }

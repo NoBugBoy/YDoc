@@ -79,7 +79,8 @@ public class ScanControllerSwagger
 	    tags.add(new Swagger.Tag(object.getKey(), object.getKey()));
 	    // 循环所有的restfulApi
 	    Method[] methods = aClass.getDeclaredMethods();
-
+	    // 配置固定headers
+	    RequestTypeMatchingSwagger.setHeaders(propertiesConfig.getHeaders());
 	    for (Method method : methods) {
 		RequestTypeMatchingSwagger.matching(paths, method, outPath, object.getKey());
 	    }
@@ -187,6 +188,6 @@ public class ScanControllerSwagger
 	System.out.println("( \\/ )(  _ \\(  _  )/ __)");
 	System.out.println(" \\  /  )(_) ))(_)(( (__ ");
 	System.out.println(" (__) (____/(_____)\\___)");
-	System.out.println("                v1.1.1   ");
+	System.out.println("                v1.1.2   ");
     }
 }

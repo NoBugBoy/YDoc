@@ -2,7 +2,9 @@ package com.github.ydoc.core;
 
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
+import javafx.animation.FadeTransition;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,7 +12,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ydoc.anno.ParamDesc;
 import com.github.ydoc.anno.ParamIgnore;
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 /**
  * author NoBugBoY description 匹配方法类型 create 2021-04-23 12:25
@@ -18,6 +19,12 @@ import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 public class RequestTypeMatchingSwagger {
     private static final Set<String> REF = new HashSet<>();
+
+    private static final List<String> HEADERS = new ArrayList<>();
+
+    public static void setHeaders(List<String> headers) {
+	HEADERS.addAll(headers);
+    }
 
     public static void matching(JSONObject json, Method method, String outPath, String tag) {
 	if (method.isAnnotationPresent(GetMapping.class)) {
@@ -241,6 +248,19 @@ public class RequestTypeMatchingSwagger {
 
     }
 
+    private static void addHeader(List<JSONObject> parametersJson) {
+	List<JSONObject> commonsHeader = HEADERS.stream().map(header -> {
+	    JSONObject h = Factory.get();
+	    h.put("name", header);
+	    h.put("in", "header");
+	    h.put("required", false);
+	    h.put("description", header);
+	    h.put("type", "string");
+	    return h;
+	}).collect(Collectors.toList());
+	parametersJson.addAll(commonsHeader);
+    }
+
     private static void get(String name, String path, JSONObject api, Method method, String outPath, String tag) {
 	// 方法对象
 	JSONObject apiMethod = Factory.get();
@@ -262,6 +282,7 @@ public class RequestTypeMatchingSwagger {
 	content.put("tags", Collections.singletonList(tag));
 	// 循环方法内参数
 	returnBuild(method, content);
+	addHeader(parametersJson);
 	Parameter[] parameters = method.getParameters();
 	for (Parameter parameterType : parameters) {
 	    if (parameterType.isAnnotationPresent(ParamIgnore.class)) {
@@ -293,6 +314,13 @@ public class RequestTypeMatchingSwagger {
 		ParamDesc annotation = parameterType.getAnnotation(ParamDesc.class);
 		paramDesc = annotation.value();
 		required = annotation.required();
+	    } else if (parameterType.isAnnotationPresent(RequestHeader.class)) {
+		RequestHeader header = parameterType.getAnnotation(RequestHeader.class);
+		paramName = header.name();
+		required = header.required();
+		paramType = "string";
+		in = "header";
+
 	    } else {
 		// 如果有其他注解则不对其生成操作
 		if (parameterType.getDeclaredAnnotations().length > 1) {
@@ -353,6 +381,7 @@ public class RequestTypeMatchingSwagger {
 	content.put("consumes", Collections.singleton("application/json"));
 	// 处理get参数 1.如果不是pojo则必须带上@RequestParam用来获取参数描述信息
 	List<JSONObject> parametersJson = new ArrayList<>();
+	addHeader(parametersJson);
 	content.put("parameters", parametersJson);
 	returnBuild(method, content);
 	// restfulApi接口的描述/功能
@@ -378,6 +407,7 @@ public class RequestTypeMatchingSwagger {
 	content.put("consumes", Collections.singleton("application/json"));
 	// 处理get参数 1.如果不是pojo则必须带上@RequestParam用来获取参数描述信息
 	List<JSONObject> parametersJson = new ArrayList<>();
+	addHeader(parametersJson);
 	content.put("parameters", parametersJson);
 	returnBuild(method, content);
 	// restfulApi接口的描述/功能
@@ -403,6 +433,7 @@ public class RequestTypeMatchingSwagger {
 	content.put("consumes", Collections.singleton("application/json"));
 	// 处理get参数 1.如果不是pojo则必须带上@RequestParam用来获取参数描述信息
 	List<JSONObject> parametersJson = new ArrayList<>();
+	addHeader(parametersJson);
 	content.put("parameters", parametersJson);
 	returnBuild(method, content);
 	// restfulApi接口的描述/功能
@@ -444,6 +475,15 @@ public class RequestTypeMatchingSwagger {
 		    properties.put(declaredField.getName(), deepObject(Factory.get(), declaredField));
 		}
 		clone.put("properties", properties);
+		list.add(api);
+	    } else if (parameter.isAnnotationPresent(RequestHeader.class)) {
+		RequestHeader header = parameter.getAnnotation(RequestHeader.class);
+		JSONObject api = Factory.get();
+		api.put("name", header.name());
+		api.put("in", "header");
+		api.put("required", Boolean.FALSE);
+		api.put("description", header.name());
+		api.put("type", "string");
 		list.add(api);
 	    }
 	}
