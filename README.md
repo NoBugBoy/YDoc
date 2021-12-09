@@ -2,6 +2,8 @@
 
 # 使用过程出现问题，可以提一个issues描述一下，看到后会更正。
 
+# [可以关注下新UI 使用vue3搭建 未来会与YDoc集成实现更多功能 ](https://github.com/NoBugBoy/YdocLuckyUi)
+
 > 充分利用springboot自有注解来对文档进行描述的一款文档生成器。
 > 让我们抛弃大量注解和配置一起拥抱简洁。
 
