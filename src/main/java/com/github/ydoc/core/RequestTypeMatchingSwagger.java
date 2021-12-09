@@ -23,7 +23,9 @@ public class RequestTypeMatchingSwagger {
     private static final List<String> HEADERS = new ArrayList<>();
 
     public static void setHeaders(List<String> headers) {
-	HEADERS.addAll(headers);
+    	if(headers != null){
+			HEADERS.addAll(headers);
+		}
     }
 
     public static void matching(JSONObject json, Method method, String outPath, String tag) {
@@ -495,10 +497,12 @@ public class RequestTypeMatchingSwagger {
 	if (declaredField.isAnnotationPresent(ParamDesc.class)) {
 	    ParamDesc annotation = declaredField.getAnnotation(ParamDesc.class);
 	    desc = annotation.value();
+		json.put("required",annotation.required());
 	}
 	if (declaredField.getType().isEnum()) {
 	    // 常规类型
 	    json.put("type", "integer");
+
 	    Object[] enumConstants = declaredField.getType().getEnumConstants();
 	    Set<String> jsonArray = new HashSet<>();
 	    for (Object enumConstant : enumConstants) {

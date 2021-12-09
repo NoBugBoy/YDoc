@@ -62,12 +62,14 @@ public class ScanControllerSwagger
 	List<Swagger.Tag> tags = new ArrayList<>();
 	JSONObject paths = Factory.get();
 	swagger.setPaths(paths);
+	// 配置固定headers
+	RequestTypeMatchingSwagger.setHeaders(propertiesConfig.getHeaders());
 	for (Map.Entry<String, Object> object : restControllerMap.entrySet()) {
 	    // 组装swagger-api
 	    Class<?> aClass = object.getValue().getClass();
 	    // 如果有外层路径需要加上
 	    String outPath = buildBaseUrl(aClass);
-	    if (!StringUtils.hasText(outPath) || "/swagger-json".equals(outPath) || outPath.contains("$")) {
+	    if ("/swagger-json".equals(outPath) || outPath.contains("$")) {
 		continue;
 	    }
 	    if (object.getKey().contains("swaggerApi") || object.getKey().contains("swagger2ControllerWebMvc")
@@ -79,8 +81,6 @@ public class ScanControllerSwagger
 	    tags.add(new Swagger.Tag(object.getKey(), object.getKey()));
 	    // 循环所有的restfulApi
 	    Method[] methods = aClass.getDeclaredMethods();
-	    // 配置固定headers
-	    RequestTypeMatchingSwagger.setHeaders(propertiesConfig.getHeaders());
 	    for (Method method : methods) {
 		RequestTypeMatchingSwagger.matching(paths, method, outPath, object.getKey());
 	    }
@@ -188,6 +188,6 @@ public class ScanControllerSwagger
 	System.out.println("( \\/ )(  _ \\(  _  )/ __)");
 	System.out.println(" \\  /  )(_) ))(_)(( (__ ");
 	System.out.println(" (__) (____/(_____)\\___)");
-	System.out.println("                v1.1.2   ");
+	System.out.println("                v1.1.3   ");
     }
 }
