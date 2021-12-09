@@ -72,7 +72,7 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，不依赖注释
        <dependency>
             <groupId>com.github.nobugboy</groupId>
             <artifactId>ydoc-spring-boot-starter</artifactId>
-            <version>1.1.2</version>
+            <version>1.1.3</version>
         </dependency>
 ```
 
