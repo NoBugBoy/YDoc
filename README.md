@@ -66,6 +66,7 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，不依赖注释
 10. 1.1.0修复返回值泛型被覆盖的问题 https://github.com/NoBugBoy/YDoc/issues/12
 11. 1.1.1修复返回值R<List<T>>解析失败的问题&深层嵌套解析内部属性失败&修复返回值List<T>解析错误
 12. 1.1.2新增通用公共headers配置，和解析@RequestHeader注解
+12. 1.1.3修复不配置headers会空指针问题，和参数必填显示为false等问题
 
 ```xml 
        <dependency>
