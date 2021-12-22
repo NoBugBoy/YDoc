@@ -476,7 +476,9 @@ public class RequestTypeMatchingSwagger {
 		    }
 		    properties.put(declaredField.getName(), deepObject(Factory.get(), declaredField));
 		}
+
 		clone.put("properties", properties);
+		bodyRequireds(clone,properties);
 		list.add(api);
 	    } else if (parameter.isAnnotationPresent(RequestHeader.class)) {
 		RequestHeader header = parameter.getAnnotation(RequestHeader.class);
@@ -494,9 +496,11 @@ public class RequestTypeMatchingSwagger {
 
     private static JSONObject deepObject(JSONObject json, Field declaredField, Type... t) {
 	String desc = declaredField.getName();
+	Boolean required = Boolean.FALSE;
 	if (declaredField.isAnnotationPresent(ParamDesc.class)) {
 	    ParamDesc annotation = declaredField.getAnnotation(ParamDesc.class);
 	    desc = annotation.value();
+		required = annotation.required();
 		json.put("required",annotation.required());
 	}
 	if (declaredField.getType().isEnum()) {
@@ -547,6 +551,7 @@ public class RequestTypeMatchingSwagger {
 		clone.remove("$ref");
 		JSONObject innerRef = new JSONObject();
 		innerRef.put("properties", clone);
+		bodyRequireds(innerRef,clone);
 		innerRef.put("type", RequestBodyType.OBJECT.type);
 
 		if (actualTypeArgument.getName().contains("$")) {
@@ -567,6 +572,7 @@ public class RequestTypeMatchingSwagger {
 	    // 常规类型
 	    json.put("type", convertType(declaredField.getType().getSimpleName()));
 	    json.put("description", desc);
+
 	    return json;
 	} else {
 	    // 修复 https://github.com/NoBugBoy/YDoc/issues/1
@@ -599,6 +605,7 @@ public class RequestTypeMatchingSwagger {
 	    if (!declaringClass.getName().toLowerCase().contains("json")) {
 		JSONObject jsonObject = Factory.get();
 		jsonObject.put("properties", objectTypeJSON);
+		bodyRequireds(jsonObject,objectTypeJSON);
 		jsonObject.put("type", RequestBodyType.OBJECT.type);
 		jsonObject.put("title", declaringClass.getSimpleName());
 		if (declaringClass.getName().contains("$")) {
@@ -620,7 +627,17 @@ public class RequestTypeMatchingSwagger {
 	}
 
     }
-
+	static void bodyRequireds(JSONObject parent,JSONObject properties){
+		List<String> requireds = properties.keySet().stream().map(key -> {
+			JSONObject booleanObject = properties.getJSONObject(key);
+			Boolean    r    = booleanObject.getBoolean("required");
+			if (r != null && r) {
+				return key;
+			}
+			return null;
+		}).filter(Objects::nonNull).collect(Collectors.toList());
+		parent.put("required", requireds);
+	}
     /**
      * 解决如果不是包装类型不是java开头的问题
      *
