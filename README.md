@@ -2,7 +2,16 @@
 
 # 使用过程出现问题，可以提一个issues描述一下，看到后会更正。
 
-# [可以关注下新UI 使用vue3搭建 未来会与YDoc集成实现更多功能 ](https://github.com/NoBugBoy/YdocLuckyUi)
+
+[final版本使用了新的ui库 ](https://github.com/NoBugBoy/YdocLuckyUi)
+
+```xml 
+       <dependency>
+            <groupId>com.github.nobugboy</groupId>
+            <artifactId>ydoc-spring-boot-starter</artifactId>
+            <version>1.1.4.final</version>
+        </dependency>
+``` 
 
 > 充分利用springboot自有注解来对文档进行描述的一款文档生成器。
 > 让我们抛弃大量注解和配置一起拥抱简洁。
@@ -76,6 +85,7 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，不依赖注释
         </dependency>
 ```
 final版本是对应正式版本并使用了新的ui库(luck-ui) 建议尝试使用该版本
+https://github.com/NoBugBoy/YdocLuckyUi
 ```xml 
        <dependency>
             <groupId>com.github.nobugboy</groupId>
