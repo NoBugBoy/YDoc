@@ -10,8 +10,5 @@ import java.lang.annotation.Target;
  **/
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ParamDesc {
-    String value() default "";
-
-    boolean required() default false;
+public @interface None {
 }

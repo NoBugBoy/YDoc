@@ -1,7 +1,7 @@
 package com.github.ydoc.exception;
 
 /**
- * author NoBugBoY description ydoc异常 create 2021-06-24 16:50
+ * @author nobugboy
  **/
 public class YdocException extends RuntimeException {
     private static final long serialVersionUID = -3371453484855642908L;

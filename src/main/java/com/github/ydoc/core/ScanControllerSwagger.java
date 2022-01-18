@@ -1,10 +1,13 @@
 package com.github.ydoc.core;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.github.ydoc.config.YDocPropertiesConfig;
 import com.github.ydoc.config.YapiApi;
+import com.github.ydoc.core.store.DefinitionsMap;
+import com.github.ydoc.core.swagger.Swagger;
+import com.github.ydoc.core.yapi.YapiAccess;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +31,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- * author NoBugBoY description 获取全部文档 create 2021-04-22 14:24
+ * @author nobugboy
  **/
 @EnableConfigurationProperties(YDocPropertiesConfig.class)
 @Slf4j
@@ -50,6 +53,18 @@ public class ScanControllerSwagger
     private ApplicationContext applicationContext;
     private Environment e;
 
+    private static final List<String> IGNORES;
+
+    static {
+	IGNORES = new ArrayList<String>(3) {
+	    {
+		add("swaggerApi");
+		add("swagger2ControllerWebMvc");
+		add("apiResourceController");
+	    }
+	};
+    }
+
     Supplier<String> basePath = () -> StringUtils.hasText(e.getProperty("server.servlet.context-path"))
 	    ? e.getProperty("server.servlet.context-path")
 	    : "/";
@@ -57,58 +72,65 @@ public class ScanControllerSwagger
     public void scan() {
 	Map<String, Object> restControllerMap = applicationContext.getBeansWithAnnotation(RestController.class);
 	Swagger swagger = Swagger.initialize();
-	swagger.setDefinitions(Factory.definitions);
+	swagger.setDefinitions(DefinitionsMap.get());
 	swagger.setBasePath(basePath.get());
 	List<Swagger.Tag> tags = new ArrayList<>();
-	JSONObject paths = Factory.get();
+	swagger.setTags(tags);
+	DocApi paths = DocApi.DOC_API;
 	swagger.setPaths(paths);
 	// 配置固定headers
-	RequestTypeMatchingSwagger.setHeaders(propertiesConfig.getHeaders());
-	for (Map.Entry<String, Object> object : restControllerMap.entrySet()) {
-	    // 组装swagger-api
-	    Class<?> aClass = object.getValue().getClass();
+	paths.setHeaders(propertiesConfig.getHeaders());
+	for (Map.Entry<String, Object> restApi : restControllerMap.entrySet()) {
+	    // aopUtils.isAop ? false
+	    Class<?> controllerClass = restApi.getValue().getClass();
+	    if (isAopProxy(controllerClass)) {
+		controllerClass = AopUtils.getTargetClass(restApi.getValue());
+	    }
+
 	    // 如果有外层路径需要加上
-	    String outPath = buildBaseUrl(aClass);
+	    String outPath = buildBaseUrl(controllerClass);
 	    if ("/swagger-json".equals(outPath) || outPath.contains("$")) {
 		continue;
 	    }
-	    if (object.getKey().contains("swaggerApi") || object.getKey().contains("swagger2ControllerWebMvc")
-		    || object.getKey().contains("apiResourceController")) {
+	    if (IGNORES.stream().anyMatch((key) -> restApi.getKey().equals(key))) {
 		continue;
 	    }
 	    outPath = Factory.pathFormat.apply(outPath);
 	    // controller分组
-	    tags.add(new Swagger.Tag(object.getKey(), object.getKey()));
+	    tags.add(new Swagger.Tag(restApi.getKey(), restApi.getKey()));
 	    // 循环所有的restfulApi
-	    Method[] methods = aClass.getDeclaredMethods();
-	    for (Method method : methods) {
-		RequestTypeMatchingSwagger.matching(paths, method, outPath, object.getKey());
+	    Method[] restMethods = controllerClass.getDeclaredMethods();
+	    for (Method method : restMethods) {
+		DocApi api = paths.update(method, outPath, restApi.getKey());
+		RequestTypeMatchingSwagger.matching(api);
 	    }
 	}
-
-	swagger.setTags(tags);
-	Factory.json = JSON.toJSONString(swagger);
+	DefinitionsMap.get().setSwaggerJson(JSON.toJSONString(swagger));
 
 	if (propertiesConfig.isPrint()) {
 	    print();
 	}
 	if (enableImport()) {
-	    importToYApi();
+	    importToYapi();
 	}
 
     }
 
+    public boolean isAopProxy(Class<?> clazz) {
+	return clazz.getName().contains("$$");
+    }
+
     public void print() {
-	log.info(Factory.json);
+	log.info(DefinitionsMap.get().getSwaggerJson());
     }
 
     public boolean enableImport() {
 	return StringUtils.hasText(propertiesConfig.getHost()) && StringUtils.hasText(propertiesConfig.getToken());
     }
 
-    public synchronized void importToYApi() {
+    public synchronized void importToYapi() {
 	yapiApi.importDoc(propertiesConfig.isCloud(), propertiesConfig.getToken(), propertiesConfig.getHost(),
-		Factory.json);
+		DefinitionsMap.get().getSwaggerJson());
 	Factory.definitions.clear();
     }
 
@@ -152,12 +174,12 @@ public class ScanControllerSwagger
 	    if (documentationCache.all().values().size() > 0) {
 		Documentation documentation = new ArrayList<>(documentationCache.all().values()).get(0);
 		io.swagger.models.Swagger swagger = this.map.mapDocumentation(documentation);
-		Factory.json = JSON.toJSONString(swagger);
+		DefinitionsMap.get().setSwaggerJson(JSON.toJSONString(swagger));
 		if (propertiesConfig.isPrint()) {
 		    print();
 		}
 		if (enableImport()) {
-		    importToYApi();
+		    importToYapi();
 		}
 	    } else {
 		log.warn("未发现任何Api,可能未配置Swagger2 Config....");
@@ -188,6 +210,6 @@ public class ScanControllerSwagger
 	System.out.println("( \\/ )(  _ \\(  _  )/ __)");
 	System.out.println(" \\  /  )(_) ))(_)(( (__ ");
 	System.out.println(" (__) (____/(_____)\\___)");
-	System.out.println("                v1.1.4   ");
+	System.out.println("                v1.1.5   ");
     }
 }

@@ -1,6 +1,7 @@
-package com.github.ydoc.core;
+package com.github.ydoc.core.swagger;
 
-import com.alibaba.fastjson.JSONObject;
+import com.github.ydoc.core.DocApi;
+import com.github.ydoc.core.kv.Kv;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,25 +11,26 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * author NoBugBoY description create 2021-04-27 09:50
+ * swagger information
+ * 
+ * @author nobugboy
  **/
 @Getter
 @Setter
 public class Swagger {
     private String swagger;
-    // 项目级别
     private Info info;
     private String basePath;
     private List<Tag> tags;
     private List<String> schemes;
-    private JSONObject paths;
-    private JSONObject definitions;
+    private DocApi paths;
+    private Kv definitions;
 
     @Getter
     @Setter
     public static class Info {
 	private String title = "YDoc(同时支持SwaggerUi和YApi的一款RestfulApi文档生成器)";
-	private String version = "1.1.4";
+	private String version = "1.1.5";
 	private String description = "YDoc生成的RestfulApi文档";
 	private Author contact = new Author();
 	private String termsOfService = "https://github.com/NoBugBoy/YDoc";

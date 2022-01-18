@@ -1,11 +1,11 @@
-package com.github.ydoc.core;
+package com.github.ydoc.core.yapi;
 
 import lombok.Data;
 
 import java.util.List;
 
 /**
- * author NoBugBoY description create 2021-06-22 13:46
+ * @author nobugboy
  **/
 @Data
 public class TestProject {

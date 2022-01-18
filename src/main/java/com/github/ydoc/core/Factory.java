@@ -5,23 +5,19 @@ import com.alibaba.fastjson.JSONObject;
 import java.util.function.Function;
 
 /**
- * author NoBugBoY description create 2021-04-27 10:30
+ * @author nobugboy
  **/
 public class Factory {
-    public static String json;
     public static String page;
-
-    public static JSONObject get() {
-	return new JSONObject();
-    }
+    private static final String SED = "/";
 
     public static JSONObject definitions = new JSONObject();
 
     public static Function<String, String> pathFormat = path -> {
-	if (!path.startsWith("/")) {
-	    path = "/" + path;
+	if (!path.startsWith(SED)) {
+	    path = SED + path;
 	}
-	if (path.endsWith("/")) {
+	if (path.endsWith(SED)) {
 	    path = path.substring(0, path.length() - 1);
 	}
 	return path;

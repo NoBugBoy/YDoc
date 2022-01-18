@@ -3,9 +3,8 @@ package com.github.ydoc.core;
 import lombok.Getter;
 
 /**
- * author NoBugBoY
- */
-
+ * @author nobugboy
+ **/
 public enum RequestBodyType {
     /**
      * object

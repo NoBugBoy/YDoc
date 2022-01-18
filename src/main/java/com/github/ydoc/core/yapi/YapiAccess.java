@@ -1,9 +1,9 @@
-package com.github.ydoc.core;
+package com.github.ydoc.core.yapi;
 
 import lombok.Data;
 
 /**
- * author NoBugBoY description create 2021-06-24 16:21
+ * @author nobugboy
  **/
 @Data
 public class YapiAccess {

@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.github.nobugboy</groupId>
     <artifactId>ydoc-spring-boot-starter</artifactId>
-    <version>1.1.4</version>
+    <version>1.1.5</version>
     <name>ydoc-spring-boot-starter</name>
     <packaging>jar</packaging>
     <description>YDoc一款低侵入性、简洁并同时支持SwaggerUi和YApi的文档生成器</description>
@@ -80,11 +80,11 @@
             <artifactId>swagger-bootstrap-ui</artifactId>
             <version>${swagger-bootstrap-ui.version}</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.github.nobugboy</groupId>-->
-<!--            <artifactId>lucky-ui</artifactId>-->
-<!--            <version>bata-0.0.1</version>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.github.nobugboy</groupId>-->
+        <!--            <artifactId>lucky-ui</artifactId>-->
+        <!--            <version>bata-0.0.1</version>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>

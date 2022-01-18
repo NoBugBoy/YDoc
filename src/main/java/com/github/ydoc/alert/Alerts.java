@@ -2,6 +2,8 @@ package com.github.ydoc.alert;
 
 import com.alibaba.fastjson.JSONObject;
 import com.github.ydoc.core.Factory;
+import com.github.ydoc.core.kv.Kv;
+import com.github.ydoc.core.kv.KvFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -15,15 +17,17 @@ import javax.mail.internet.MimeMessage;
 import java.util.List;
 
 /**
- * author NoBugBoY description create 2021-06-22 14:35
+ * YApi api auto test
+ * 
+ * @author nobugboy
  **/
 @Slf4j
 public class Alerts {
     private static final String DING_URL = "https://oapi.dingtalk.com/robot/send?access_token=";
 
     public static void hookDing(RestTemplate restTemplate, String title, String msg, String host, String accessToken) {
-	JSONObject param = Factory.get();
-	JSONObject inner = Factory.get();
+	Kv param = KvFactory.get().empty();
+	Kv inner = KvFactory.get().empty();
 	inner.put("title", "YDoc自动化测试[" + title + "]结果通知");
 	inner.put("text", "通知:" + msg);
 	inner.put("picUrl", "https://photo.16pic.com/00/65/09/16pic_6509905_b.png");

@@ -18,7 +18,7 @@ import org.springframework.web.client.RestTemplate;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
- * author NoBugBoY description create 2021-04-22 14:22
+ * @author nobugboy
  **/
 @Configuration
 @EnableConfigurationProperties(YDocPropertiesConfig.class)

@@ -3,11 +3,13 @@ package com.github.ydoc.config;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ydoc.alert.Alerts;
+import com.github.ydoc.core.kv.Kv;
+import com.github.ydoc.core.kv.KvFactory;
 import com.github.ydoc.exception.YdocException;
-import com.github.ydoc.core.AutoTest;
+import com.github.ydoc.core.yapi.AutoTest;
 import com.github.ydoc.core.Factory;
-import com.github.ydoc.core.TestProject;
-import com.github.ydoc.core.YapiAccess;
+import com.github.ydoc.core.yapi.TestProject;
+import com.github.ydoc.core.yapi.YapiAccess;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -21,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * author NoBugBoY description create 2021-04-28 12:04
+ * @author nobugboy
  **/
 @Slf4j
 public class YapiApi {
@@ -41,7 +43,7 @@ public class YapiApi {
 	    log.error("json is null, import yapi error");
 	    return;
 	}
-	JSONObject param = Factory.get();
+	Kv param = KvFactory.get().empty();
 	param.put("type", "swagger");
 	param.put("merge", cloud ? "good" : "merge");
 	param.put("token", token);
@@ -63,7 +65,7 @@ public class YapiApi {
      * @return YapiAccess
      */
     public YapiAccess login() {
-	JSONObject param0 = Factory.get();
+	Kv param0 = KvFactory.get().empty();
 	param0.put("email", config.getYapiUserEmail());
 	param0.put("password", config.getYapiUserPassword());
 	HttpHeaders headers = new HttpHeaders();

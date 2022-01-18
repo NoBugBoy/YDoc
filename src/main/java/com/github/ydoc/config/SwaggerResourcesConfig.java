@@ -8,8 +8,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * @author NoBugBoY
- */
+ * @author nobugboy
+ **/
 public class SwaggerResourcesConfig implements SwaggerResourcesProvider {
 
     @Override
