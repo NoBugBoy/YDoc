@@ -2,7 +2,16 @@
 
 # 使用过程出现问题，可以提一个issues描述一下，看到后会更正。
 
-# [可以关注下新UI 使用vue3搭建 未来会与YDoc集成实现更多功能 ](https://github.com/NoBugBoy/YdocLuckyUi)
+
+[final版本使用了新的ui库 ](https://github.com/NoBugBoy/YdocLuckyUi)
+
+```xml 
+       <dependency>
+            <groupId>com.github.nobugboy</groupId>
+            <artifactId>ydoc-spring-boot-starter</artifactId>
+            <version>1.1.4.final</version>
+        </dependency>
+``` 
 
 > 充分利用springboot自有注解来对文档进行描述的一款文档生成器。
 > 让我们抛弃大量注解和配置一起拥抱简洁。
@@ -67,14 +76,24 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，不依赖注释
 11. 1.1.1修复返回值R<List<T>>解析失败的问题&深层嵌套解析内部属性失败&修复返回值List<T>解析错误
 12. 1.1.2新增通用公共headers配置，和解析@RequestHeader注解
 12. 1.1.3修复不配置headers会空指针问题，和参数必填显示为false等问题
-
+13. 1.1.4修复requestbody对象内参数使用ParamDesc的required修饰时没有正确的显示在文档上
+       
 ```xml 
        <dependency>
             <groupId>com.github.nobugboy</groupId>
             <artifactId>ydoc-spring-boot-starter</artifactId>
-            <version>1.1.3</version>
+            <version>1.1.4</version>
         </dependency>
 ```
+final版本是对应正式版本并使用了新的ui库(luck-ui) 建议尝试使用该版本
+https://github.com/NoBugBoy/YdocLuckyUi
+```xml 
+       <dependency>
+            <groupId>com.github.nobugboy</groupId>
+            <artifactId>ydoc-spring-boot-starter</artifactId>
+            <version>1.1.4.final</version>
+        </dependency>
+```       
 
 | 配置名 | 值 | 是否必须|
 |--|--| -- | 
