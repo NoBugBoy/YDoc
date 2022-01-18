@@ -2,14 +2,13 @@
 
 # 使用过程出现问题，可以提一个issues描述一下，看到后会更正。
 
-
 [final版本使用了新的ui库 ](https://github.com/NoBugBoy/YdocLuckyUi)
 
 ```xml 
        <dependency>
             <groupId>com.github.nobugboy</groupId>
             <artifactId>ydoc-spring-boot-starter</artifactId>
-            <version>1.1.4.final</version>
+            <version>1.1.5.final</version>
         </dependency>
 ``` 
 
@@ -77,41 +76,34 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，不依赖注释
 12. 1.1.2新增通用公共headers配置，和解析@RequestHeader注解
 12. 1.1.3修复不配置headers会空指针问题，和参数必填显示为false等问题
 13. 1.1.4修复requestbody对象内参数使用ParamDesc的required修饰时没有正确的显示在文档上
-       
+13. 1.1.5修复代理类无法被正常生成api的问题&代码重构
+
 ```xml 
        <dependency>
             <groupId>com.github.nobugboy</groupId>
             <artifactId>ydoc-spring-boot-starter</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.5</version>
         </dependency>
 ```
+
 final版本是对应正式版本并使用了新的ui库(luck-ui) 建议尝试使用该版本
 https://github.com/NoBugBoy/YdocLuckyUi
+
 ```xml 
        <dependency>
             <groupId>com.github.nobugboy</groupId>
             <artifactId>ydoc-spring-boot-starter</artifactId>
-            <version>1.1.4.final</version>
+            <version>1.1.5.final</version>
         </dependency>
 ```       
 
-| 配置名 | 值 | 是否必须|
-|--|--| -- | 
-| ydoc.token | YApi项目中生成的token |否| 
-| ydoc.host | YApi的url,例http://localhost:3000 |否|
-| ydoc.headers | 配置所有api公共header参数（多个用,分割）|否|
-|ydoc.enable | 程序启动时是否同步到YApi平台 |是|
-| ydoc.print | 程序启动时是否打印离线JSON（可手动导入到YApi或其他文档平台） |否|
-| ydoc.swagger-native |是否启用Swagger原生配置生成文档（方便已经集成了swagger得用户） |否| 
-| ydoc.cloud | 是否开启微服务模式 |否| | ydoc.autoTest | 是否开启自动化测试 |否| 
-| ydoc.test.name| 自动化测试集合名称,可以多个(自动化测试时使用) |否| 
-| ydoc.id | yapi项目id,在设置中查看(自动化测试时使用) |否|
-| ydoc.yapi.user.email | yapi登录邮箱(自动化测试时使用) |否|
-| ydoc.yapi.user.password | yapi登录邮箱密码(自动化测试时使用) |否|
-| ydoc.accessToken | 钉钉机器人token(自动化测试时使用) |否|
-| ydoc.email.host |邮件服务器(自动化测试时使用) |否|
-| ydoc.email.password | 邮箱pop3,smtp密码(自动化测试时使用) |否|
-| ydoc.email.password | 邮箱pop3,smtp密码(自动化测试时使用)|否|
+| 配置名 | 值 | 是否必须| |--|--| -- | | ydoc.token | YApi项目中生成的token |否| | ydoc.host | YApi的url,例http://localhost:3000 |否| |
+ydoc.headers | 配置所有api公共header参数（多个用,分割）|否| |ydoc.enable | 程序启动时是否同步到YApi平台 |是| | ydoc.print |
+程序启动时是否打印离线JSON（可手动导入到YApi或其他文档平台） |否| | ydoc.swagger-native |是否启用Swagger原生配置生成文档（方便已经集成了swagger得用户） |否| | ydoc.cloud |
+是否开启微服务模式 |否| | ydoc.autoTest | 是否开启自动化测试 |否| | ydoc.test.name| 自动化测试集合名称,可以多个(自动化测试时使用) |否| | ydoc.id |
+yapi项目id,在设置中查看(自动化测试时使用) |否| | ydoc.yapi.user.email | yapi登录邮箱(自动化测试时使用) |否| | ydoc.yapi.user.password | yapi登录邮箱密码(
+自动化测试时使用) |否| | ydoc.accessToken | 钉钉机器人token(自动化测试时使用) |否| | ydoc.email.host |邮件服务器(自动化测试时使用) |否| | ydoc.email.password
+| 邮箱pop3,smtp密码(自动化测试时使用) |否| | ydoc.email.password | 邮箱pop3,smtp密码(自动化测试时使用)|否|
 
 注意当开启了swagger-native，需要将原工程的swagger依赖删除即可。（YDoc内部使用swagger3.0）
 
@@ -150,22 +142,13 @@ https://github.com/NoBugBoy/YdocLuckyUi
 
 抛弃大量Swagger注解和配置，仅需在SpringBootWeb开发时必须注解上加额外参数对api或参数进行描述，大大减少了对工程的侵入性，简化开发流程
 
-| 注解 | 值 | 
-|--|--| 
-| @RestController | 注解中value描述controller的作用，默认为controller名 | 
-| @RequestMapping|注解中name描述该api的作用，在类上加跟路径时不需要name | 
-| @PathVariable|注解中name描述该参数的作用 | 
-| @GetMapping | 注解中name描述该api的作用 | 
-| @PostMapping |注解中name描述该api的作用 | 
-| @DeleteMapping | 注解中name描述该api的作用 | 
-| @PutMapping | 注解中name描述该api的作用 |
-| @RequestHeader | 注解中name描述该api的作用 |
+| 注解 | 值 | |--|--| | @RestController | 注解中value描述controller的作用，默认为controller名 | |
+@RequestMapping|注解中name描述该api的作用，在类上加跟路径时不需要name | | @PathVariable|注解中name描述该参数的作用 | | @GetMapping | 注解中name描述该api的作用 |
+| @PostMapping |注解中name描述该api的作用 | | @DeleteMapping | 注解中name描述该api的作用 | | @PutMapping | 注解中name描述该api的作用 | |
+@RequestHeader | 注解中name描述该api的作用 |
 
 @ParamDesc与@ParamIgnore为YDoc额外的自有注解，其余为SpringBoot的注解，@ParamDesc用来标识实体中参数的描述，@ParamIgnore用来忽略参数不参与生成文档，如不加参数描述则默认为参数的名称。
-| 注解 | 值 | 
-|--|--|
-| @ParamDesc| 注解中value描述该参数的描述，required是否必须 |
-| @ParamIgnore| 忽略参数 |
+| 注解 | 值 | |--|--| | @ParamDesc| 注解中value描述该参数的描述，required是否必须 | | @ParamIgnore| 忽略参数 |
 
 ### 6. Enum类型
 
