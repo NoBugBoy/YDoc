@@ -97,13 +97,24 @@ https://github.com/NoBugBoy/YdocLuckyUi
         </dependency>
 ```       
 
-| 配置名 | 值 | 是否必须| |--|--| -- | | ydoc.token | YApi项目中生成的token |否| | ydoc.host | YApi的url,例http://localhost:3000 |否| |
-ydoc.headers | 配置所有api公共header参数（多个用,分割）|否| |ydoc.enable | 程序启动时是否同步到YApi平台 |是| | ydoc.print |
-程序启动时是否打印离线JSON（可手动导入到YApi或其他文档平台） |否| | ydoc.swagger-native |是否启用Swagger原生配置生成文档（方便已经集成了swagger得用户） |否| | ydoc.cloud |
-是否开启微服务模式 |否| | ydoc.autoTest | 是否开启自动化测试 |否| | ydoc.test.name| 自动化测试集合名称,可以多个(自动化测试时使用) |否| | ydoc.id |
-yapi项目id,在设置中查看(自动化测试时使用) |否| | ydoc.yapi.user.email | yapi登录邮箱(自动化测试时使用) |否| | ydoc.yapi.user.password | yapi登录邮箱密码(
-自动化测试时使用) |否| | ydoc.accessToken | 钉钉机器人token(自动化测试时使用) |否| | ydoc.email.host |邮件服务器(自动化测试时使用) |否| | ydoc.email.password
-| 邮箱pop3,smtp密码(自动化测试时使用) |否| | ydoc.email.password | 邮箱pop3,smtp密码(自动化测试时使用)|否|
+| 配置名 | 值 | 是否必须| 
+|--|--| -- |
+| ydoc.token | YApi项目中生成的token |否|
+| ydoc.host | YApi的url,例http://localhost:3000 |否|
+| ydoc.headers | 配置所有api公共header参数（多个用,分割）|否| 
+|ydoc.enable | 程序启动时是否同步到YApi平台 |是|
+| ydoc.print | 程序启动时是否打印离线JSON（可手动导入到YApi或其他文档平台） |否| 
+| ydoc.swagger-native |是否启用Swagger原生配置生成文档（方便已经集成了swagger得用户） |否|
+| ydoc.cloud |是否开启微服务模式 |否| 
+| ydoc.autoTest | 是否开启自动化测试 |否|
+| ydoc.test.name| 自动化测试集合名称,可以多个(自动化测试时使用) |否|
+| ydoc.id |yapi项目id,在设置中查看(自动化测试时使用) |否| 
+| ydoc.yapi.user.email | yapi登录邮箱(自动化测试时使用) |否| 
+| ydoc.yapi.user.password | yapi登录邮箱密码(自动化测试时使用) |否|
+| ydoc.accessToken | 钉钉机器人token(自动化测试时使用) |否| 
+| ydoc.email.host |邮件服务器(自动化测试时使用) |否|
+| ydoc.email.password| 邮箱pop3,smtp密码(自动化测试时使用) |否|
+| ydoc.email.password | 邮箱pop3,smtp密码(自动化测试时使用)|否|
 
 注意当开启了swagger-native，需要将原工程的swagger依赖删除即可。（YDoc内部使用swagger3.0）
 
