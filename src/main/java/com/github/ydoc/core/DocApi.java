@@ -2,6 +2,7 @@ package com.github.ydoc.core;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.*;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -12,8 +13,9 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class DocApi extends JSONObject {
-    private transient Method method;
-    private transient String outPath;
+    private transient Method        method;
+    private transient RequestMethod methodName;
+    private transient String        outPath;
     private transient String tag;
     private transient List<String> headers;
     public static final DocApi DOC_API = new DocApi();

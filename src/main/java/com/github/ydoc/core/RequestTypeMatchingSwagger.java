@@ -2,10 +2,8 @@ package com.github.ydoc.core;
 
 import java.util.*;
 
-import com.github.ydoc.core.handler.api.DeleteHandler;
-import com.github.ydoc.core.handler.api.GetHandler;
-import com.github.ydoc.core.handler.api.PostHandler;
-import com.github.ydoc.core.handler.api.PutHandler;
+import com.github.ydoc.core.handler.api.*;
+import com.github.ydoc.core.strategy.IStrategy;
 import com.google.common.base.Strings;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.web.bind.annotation.*;
@@ -15,15 +13,17 @@ import org.springframework.web.bind.annotation.*;
  **/
 
 public class RequestTypeMatchingSwagger {
-    private static final GetHandler GET_HANDLER;
-    private static final PostHandler POST_HANDLER;
-    private static final PutHandler PUT_HANDLER;
-    private static final DeleteHandler DELETE_HANDLER;
+    private static final IStrategy<GetMapping,DocApi> GET_HANDLER;
+    private static final IStrategy<PostMapping,DocApi> POST_HANDLER;
+    private static final IStrategy<PutMapping,DocApi> PUT_HANDLER;
+    private static final IStrategy<DeleteMapping,DocApi> DELETE_HANDLER;
+    private static final IStrategy<RequestMapping,DocApi> REQUEST_HANDLER;
     static {
 	GET_HANDLER = new GetHandler();
 	POST_HANDLER = new PostHandler();
 	PUT_HANDLER = new PutHandler();
 	DELETE_HANDLER = new DeleteHandler();
+	REQUEST_HANDLER = new RequestHandler();
     }
 
     public static void matching(DocApi docApi) {
@@ -56,33 +56,18 @@ public class RequestTypeMatchingSwagger {
 	    DELETE_HANDLER.generateApi(deleteMapping, docApi);
 	} else if (Objects
 		.nonNull(requestMapping = AnnotationUtils.getAnnotation(docApi.getMethod(), RequestMapping.class))) {
-	    RequestMethod requestMethod = null;
-	    if (requestMapping.method().length > 0) {
-		requestMethod = requestMapping.method()[0];
-	    }
-	    if (requestMapping.value().length > 0) {
-		addPath(requestMapping.value()[0], docApi);
-	    }
-	    if (requestMethod != null) {
-		switch (requestMethod) {
-		case GET:
-		    GET_HANDLER.generateApi((GetMapping) requestMapping, docApi);
-		    return;
-		case PUT:
-		    PUT_HANDLER.generateApi((PutMapping) requestMapping, docApi);
-		    return;
-		case POST:
-		    POST_HANDLER.generateApi((PostMapping) requestMapping, docApi);
-		    return;
-		case DELETE:
-		    DELETE_HANDLER.generateApi((DeleteMapping) requestMapping, docApi);
-		    return;
-		default:
+		RequestMethod requestMethod = null;
+		if (requestMapping.method().length > 0) {
+			requestMethod = requestMapping.method()[0];
+			docApi.setMethodName(requestMethod);
 		}
+		if (requestMapping.value().length > 0) {
+			addPath(requestMapping.value()[0], docApi);
+		}
+		REQUEST_HANDLER.generateApi(requestMapping,docApi);
 	    }
 	}
 
-    }
 
     public static void addPath(String path, DocApi docApi) {
 	if (!Strings.isNullOrEmpty(path)) {

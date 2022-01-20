@@ -44,10 +44,12 @@ public abstract class IAbstractStrategy<T extends Annotation, O extends JSONObje
     }
 
     protected void addHeader(List<Kv> parametersJson, List<String> headers) {
-	List<Kv> commonsHeader = headers.stream().map(
-		header -> KvFactory.get().lv3Params(header, Constans.In.HEADER, false, header, Constans.Type.STRING))
-		.collect(Collectors.toList());
-	parametersJson.addAll(commonsHeader);
+		if(headers != null){
+			List<Kv> commonsHeader = headers.stream().map(
+					header -> KvFactory.get().lv3Params(header, Constans.In.HEADER, false, header, Constans.Type.STRING))
+				.collect(Collectors.toList());
+			parametersJson.addAll(commonsHeader);
+		}
     }
 
     protected Kv deepObject(Kv json, Field declaredField, Type... t) {

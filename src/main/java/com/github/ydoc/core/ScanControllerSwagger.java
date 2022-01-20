@@ -210,6 +210,6 @@ public class ScanControllerSwagger
 	System.out.println("( \\/ )(  _ \\(  _  )/ __)");
 	System.out.println(" \\  /  )(_) ))(_)(( (__ ");
 	System.out.println(" (__) (____/(_____)\\___)");
-	System.out.println("                v1.1.5   ");
+	System.out.println("                v1.1.6.final   ");
     }
 }

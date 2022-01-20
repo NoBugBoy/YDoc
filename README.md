@@ -16,7 +16,7 @@ spring.mvc.pathmatch.matching-strategy=ant_path_matcher
        <dependency>
             <groupId>com.github.nobugboy</groupId>
             <artifactId>ydoc-spring-boot-starter</artifactId>
-            <version>1.1.5.final</version>
+            <version>1.1.6.final</version>
         </dependency>
 ``` 
 
@@ -85,12 +85,13 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，不依赖注释
 12. 1.1.3修复不配置headers会空指针问题，和参数必填显示为false等问题
 13. 1.1.4修复requestbody对象内参数使用ParamDesc的required修饰时没有正确的显示在文档上
 13. 1.1.5修复代理类无法被正常生成api的问题&代码重构
+13. 1.1.6修复1.1.5的bug
 
 ```xml 
        <dependency>
             <groupId>com.github.nobugboy</groupId>
             <artifactId>ydoc-spring-boot-starter</artifactId>
-            <version>1.1.5</version>
+            <version>1.1.6</version>
         </dependency>
 ```
 
@@ -101,7 +102,7 @@ https://github.com/NoBugBoy/YdocLuckyUi
        <dependency>
             <groupId>com.github.nobugboy</groupId>
             <artifactId>ydoc-spring-boot-starter</artifactId>
-            <version>1.1.5.final</version>
+            <version>1.1.6.final</version>
         </dependency>
 ```       
 
