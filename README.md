@@ -2,6 +2,9 @@
 
 # 使用过程出现问题，可以提一个issues描述一下，看到后会更正。
 
+
+### 1.1.5版本需要配置  ydoc.headers= 这是个bug，下个版本会修复
+
 [final版本使用了新的ui库 ](https://github.com/NoBugBoy/YdocLuckyUi)
 
 ```xml 
