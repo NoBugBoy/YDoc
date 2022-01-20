@@ -5,6 +5,11 @@
 
 ### 1.1.5版本需要配置  ydoc.headers= 这是个bug，下个版本会修复
 
+使用Springboot 2.6.* 的朋友需要在配置文件新增一条参数
+```
+spring.mvc.pathmatch.matching-strategy=ant_path_matcher
+```
+
 [final版本使用了新的ui库 ](https://github.com/NoBugBoy/YdocLuckyUi)
 
 ```xml 
