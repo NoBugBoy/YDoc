@@ -9,7 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * YDoc project entry
+ * YDoc json object 扩展类型
  * 
  * @author nobugboy
  **/

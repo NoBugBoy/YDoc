@@ -7,7 +7,7 @@ import java.util.function.Function;
 /**
  * @author nobugboy
  **/
-public class Factory {
+public class Utils {
     public static String page;
     private static final String SED = "/";
 

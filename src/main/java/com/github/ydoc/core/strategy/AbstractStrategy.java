@@ -4,12 +4,10 @@ import com.alibaba.fastjson.JSONObject;
 
 import com.github.ydoc.anno.ParamDesc;
 import com.github.ydoc.anno.ParamIgnore;
-import com.github.ydoc.core.DocApi;
-import com.github.ydoc.core.Factory;
-import com.github.ydoc.core.RequestBodyType;
+import com.github.ydoc.core.*;
 import com.github.ydoc.core.consts.Constans;
-import com.github.ydoc.core.Core;
 import com.github.ydoc.core.handler.middleware.MiddlewareSelect;
+import com.github.ydoc.core.kv.DocApi;
 import com.github.ydoc.core.kv.Kv;
 import com.github.ydoc.core.kv.KvFactory;
 import com.github.ydoc.core.store.DefinitionsMap;
@@ -25,13 +23,16 @@ import java.util.stream.Collectors;
 /**
  * @author nobugboy
  **/
-public abstract class IAbstractStrategy<T extends Annotation, O extends JSONObject> implements IStrategy<T, O> {
+public abstract class AbstractStrategy<T extends Annotation, O extends JSONObject>
+	implements Strategy<O>, AnnotationProxy<T> {
+
+    protected T proxy;
 
     protected Kv rebuildPath(DocApi docApi, String... paths) {
 	String path = "";
 	if (paths.length > 0) {
 	    // base拼接restfulApi的路径
-	    path = Factory.pathFormat.apply(path);
+	    path = Utils.pathFormat.apply(path);
 	}
 	Kv apiMethod = KvFactory.get().empty();
 	if (docApi.containsKey(docApi.getOutPath() + path)) {
@@ -44,12 +45,11 @@ public abstract class IAbstractStrategy<T extends Annotation, O extends JSONObje
     }
 
     protected void addHeader(List<Kv> parametersJson, List<String> headers) {
-		if(headers != null){
-			List<Kv> commonsHeader = headers.stream().map(
-					header -> KvFactory.get().lv3Params(header, Constans.In.HEADER, false, header, Constans.Type.STRING))
-				.collect(Collectors.toList());
-			parametersJson.addAll(commonsHeader);
-		}
+	if (headers != null) {
+	    List<Kv> commonsHeader = headers.stream().map(header -> KvFactory.get().lv3Params(header,
+		    Constans.In.HEADER, false, header, Constans.Type.STRING)).collect(Collectors.toList());
+	    parametersJson.addAll(commonsHeader);
+	}
     }
 
     protected Kv deepObject(Kv json, Field declaredField, Type... t) {
@@ -150,7 +150,6 @@ public abstract class IAbstractStrategy<T extends Annotation, O extends JSONObje
 	    for (Field declaredField : getAllFiled(returnType)) {
 		// 临时支持单泛型返回值 https://github.com/NoBugBoy/YDoc/issues/8
 		if (objectType != null && "Object".equals(declaredField.getType().getSimpleName())) {
-		    // 将该类型指向给Object
 		    objectTypeJson.put(declaredField.getName(),
 			    deepObject(KvFactory.get().empty(), declaredField, objectType));
 		} else {
@@ -176,7 +175,17 @@ public abstract class IAbstractStrategy<T extends Annotation, O extends JSONObje
 	    if (parameter.isAnnotationPresent(ParamIgnore.class)) {
 		continue;
 	    }
-	    MiddlewareSelect.select(parameter, queryParams);
+	    MiddlewareSelect.selectAndRun(parameter, queryParams);
 	}
+    }
+
+    @Override
+    public void setProxy(T proxy) {
+	this.proxy = proxy;
+    }
+
+    @Override
+    public T getProxy() {
+	return proxy;
     }
 }

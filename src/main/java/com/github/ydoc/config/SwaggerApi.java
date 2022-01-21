@@ -1,11 +1,9 @@
 package com.github.ydoc.config;
 
-import com.github.ydoc.core.Factory;
+import com.github.ydoc.core.Utils;
 import com.github.ydoc.core.store.DefinitionsMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.swing.plaf.basic.DefaultMenuLayout;
 
 /**
  * @author nobugboy
@@ -19,6 +17,6 @@ public class SwaggerApi {
 
     @GetMapping("/test-page")
     public String tesPage() {
-	return Factory.page;
+	return Utils.page;
     }
 }

@@ -3,7 +3,6 @@ package com.github.ydoc.core;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ydoc.anno.ParamDesc;
-import com.github.ydoc.core.RequestBodyType;
 import com.github.ydoc.core.consts.Constans;
 import com.github.ydoc.core.kv.Kv;
 import com.github.ydoc.core.kv.KvFactory;
@@ -15,10 +14,18 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * core static method
+ * 
  * @author nobugboy
  **/
 public class Core {
-
+    /**
+     * parse java enum to string
+     * 
+     * @param json       target
+     * @param enumValues enums
+     * @return kv
+     */
     private static Kv enumProcess(Kv json, Object[] enumValues) {
 	json.put("type", Constans.Type.INTEGER);
 	Set<String> jsonArray = new HashSet<>();
@@ -29,6 +36,12 @@ public class Core {
 	return json;
     }
 
+    /**
+     * parse request body
+     * 
+     * @param parent     target
+     * @param properties property
+     */
     public static void bodyRequired(Kv parent, Kv properties) {
 	List<String> requireds = properties.keySet().stream().map(key -> {
 	    JSONObject booleanObject = properties.getJSONObject(key);
@@ -41,6 +54,14 @@ public class Core {
 	parent.put("required", requireds);
     }
 
+    /**
+     * parse collection
+     * 
+     * @param json          target
+     * @param declaredField filed
+     * @param desc          description
+     * @return kv
+     */
     private static Kv collectionProcess(Kv json, Field declaredField, String desc) {
 	Type genericType = declaredField.getGenericType();
 	ParameterizedType pt = (ParameterizedType) genericType;
@@ -68,7 +89,7 @@ public class Core {
 	    }
 	    json.put("items", jsonObject);
 	    Kv clone = (Kv) filedObject.clone();
-	    clone.remove("$ref");
+	    clone.remove(Constans.Other.REF);
 	    Kv innerRef = KvFactory.get().innerRef(clone, Constans.Type.OBJECT);
 	    bodyRequired(innerRef, clone);
 	    DefinitionsMap.get().putIfAbsent(actualTypeArgument.getSimpleName(), innerRef);
@@ -78,6 +99,14 @@ public class Core {
 	return json;
     }
 
+    /**
+     * deep recursion field
+     * 
+     * @param json          target json
+     * @param declaredField field
+     * @param t             types
+     * @return kv
+     */
     public static Kv deepObject(Kv json, Field declaredField, Type... t) {
 	String desc = declaredField.getName();
 	if (declaredField.isAnnotationPresent(ParamDesc.class)) {
@@ -158,6 +187,12 @@ public class Core {
 	return false;
     };
 
+    /**
+     * java type to swagger type
+     * 
+     * @param type java type
+     * @return swagger type
+     */
     public static String convertType(String type) {
 	type = type.toLowerCase();
 	if (type.contains("java.lang")) {
@@ -172,6 +207,12 @@ public class Core {
 	return RequestBodyType.of(type).type;
     }
 
+    /**
+     * get this class and super class all fields
+     * 
+     * @param clazz this class
+     * @return all fields
+     */
     public static Field[] getAllFiled(Class<?> clazz) {
 	List<Field> fieldList = new ArrayList<>();
 	while (clazz != null) {
@@ -180,17 +221,20 @@ public class Core {
 	}
 	Field[] fields = new Field[fieldList.size()];
 	return fieldList.toArray(fields);
-    };
+    }
 
+    /**
+     * type converted to instance class
+     * 
+     * @param src type
+     * @return instance class
+     */
     public static Class<?> typeToClass(Type src) {
 	Class<?> result = null;
-	// 如果src是Class类型的实例则直接进行强制类型转换
 	if (src instanceof Class) {
 	    result = (Class<?>) src;
-	    // 如果src是参数类型则获取其原始类型Class对象；
 	} else if (src instanceof ParameterizedType) {
 	    result = (Class<?>) ((ParameterizedType) src).getRawType();
-	    //
 	} else if (src instanceof GenericArrayType) {
 	    Type componentType = ((GenericArrayType) src).getGenericComponentType();
 	    if (componentType instanceof Class) {
@@ -204,5 +248,40 @@ public class Core {
 	    result = Object.class;
 	}
 	return result;
+    }
+
+    /**
+     * any proxy annotation object converted to real annotation name
+     * 
+     * @param proxy proxy annotation object
+     * @return annotation name
+     */
+    public static String proxyToTargetClassName(Object proxy) {
+	Field h = null;
+	try {
+	    h = proxy.getClass().getSuperclass().getDeclaredField("h");
+	    h.setAccessible(true);
+	    Object h_instance = h.get(proxy);
+	    Field type = h_instance.getClass().getDeclaredField("type");
+	    type.setAccessible(true);
+	    Object type_instance = type.get(h_instance);
+	    Field name = type_instance.getClass().getDeclaredField("name");
+	    name.setAccessible(true);
+	    Object className = name.get(type_instance);
+	    return className.toString().substring(className.toString().lastIndexOf(Constans.Other.DOT) + 1);
+	} catch (NoSuchFieldException | IllegalAccessException e) {
+	    return null;
+	}
+
+    }
+
+    /**
+     * get now impl version
+     * 
+     * @return pom xml version
+     */
+    public static String getVersion() {
+	Package aPackage = Core.class.getPackage();
+	return aPackage == null ? "" : aPackage.getImplementationVersion();
     }
 }

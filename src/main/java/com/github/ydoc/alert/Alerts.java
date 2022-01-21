@@ -1,7 +1,6 @@
 package com.github.ydoc.alert;
 
 import com.alibaba.fastjson.JSONObject;
-import com.github.ydoc.core.Factory;
 import com.github.ydoc.core.kv.Kv;
 import com.github.ydoc.core.kv.KvFactory;
 import lombok.extern.slf4j.Slf4j;

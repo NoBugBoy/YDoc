@@ -1,6 +1,6 @@
 package com.github.ydoc.config;
 
-import com.github.ydoc.core.ScanControllerSwagger;
+import com.github.ydoc.core.ScanApi;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -31,8 +31,8 @@ public class AutoConfig implements ApplicationContextAware {
 
     @ConditionalOnProperty(prefix = "ydoc", name = "enable", havingValue = "true")
     @Bean
-    public ScanControllerSwagger controllerSwagger() {
-	return new ScanControllerSwagger(yapiApi());
+    public ScanApi controllerSwagger() {
+	return new ScanApi(yapiApi());
     }
 
     @Bean

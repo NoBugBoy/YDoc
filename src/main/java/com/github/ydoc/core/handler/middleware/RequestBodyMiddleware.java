@@ -3,12 +3,12 @@ package com.github.ydoc.core.handler.middleware;
 import com.github.ydoc.anno.ParamIgnore;
 import com.github.ydoc.core.consts.Constans;
 import com.github.ydoc.core.Core;
-import com.github.ydoc.core.handler.Middleware;
 import com.github.ydoc.core.kv.Kv;
 import com.github.ydoc.core.kv.KvFactory;
 import com.github.ydoc.core.store.DefinitionsMap;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
 import java.util.List;
@@ -16,9 +16,9 @@ import java.util.List;
 /**
  * @author nobugboy
  **/
-public class RequestBodyMiddleware implements Middleware<RequestBody> {
+public class RequestBodyMiddleware extends AbstractMiddleware<RequestBody> {
     @Override
-    public void doHandle(List<Kv> target, Parameter parameter, RequestBody annotation) {
+    public void doHandle(List<Kv> target, Parameter parameter) {
 	Class<?> type = parameter.getType();
 	Field[] declaredFields = Core.getAllFiled(type);
 	Kv schema = KvFactory.get().bodyScheme(type.getSimpleName(), type.getSimpleName());
@@ -38,5 +38,10 @@ public class RequestBodyMiddleware implements Middleware<RequestBody> {
 	clone.put("properties", properties);
 	Core.bodyRequired(clone, properties);
 	target.add(api);
+    }
+
+    @Override
+    public int getOrder() {
+	return 999;
     }
 }

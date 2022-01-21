@@ -7,7 +7,7 @@ import com.github.ydoc.core.kv.Kv;
 import com.github.ydoc.core.kv.KvFactory;
 import com.github.ydoc.exception.YdocException;
 import com.github.ydoc.core.yapi.AutoTest;
-import com.github.ydoc.core.Factory;
+import com.github.ydoc.core.Utils;
 import com.github.ydoc.core.yapi.TestProject;
 import com.github.ydoc.core.yapi.YapiAccess;
 import lombok.extern.slf4j.Slf4j;
@@ -156,7 +156,7 @@ public class YapiApi {
 			    int start = utf8.indexOf("<div class=\"m-header\">");
 			    int end = utf8.indexOf("<div class=\"g-doc\">");
 			    utf8 = utf8.subSequence(0, start) + utf8.substring(end);
-			    Factory.page = utf8;
+			    Utils.page = utf8;
 			    Alerts.htmlEmail(javaMailSender, utf8, config.getYapiUserEmail(), config.getToEmails());
 			}
 		    }

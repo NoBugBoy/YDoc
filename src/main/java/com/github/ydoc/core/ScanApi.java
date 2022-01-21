@@ -3,6 +3,7 @@ package com.github.ydoc.core;
 import com.alibaba.fastjson.JSON;
 import com.github.ydoc.config.YDocPropertiesConfig;
 import com.github.ydoc.config.YapiApi;
+import com.github.ydoc.core.kv.DocApi;
 import com.github.ydoc.core.store.DefinitionsMap;
 import com.github.ydoc.core.swagger.Swagger;
 import com.github.ydoc.core.yapi.YapiAccess;
@@ -31,15 +32,17 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /**
+ * YDoc 扫描api入口类
+ * 
  * @author nobugboy
  **/
 @EnableConfigurationProperties(YDocPropertiesConfig.class)
 @Slf4j
-public class ScanControllerSwagger
+public class ScanApi
 	implements ApplicationContextAware, EnvironmentAware, InitializingBean, CommandLineRunner {
     private final YapiApi yapiApi;
 
-    public ScanControllerSwagger(YapiApi yapiApi) {
+    public ScanApi(YapiApi yapiApi) {
 	this.yapiApi = yapiApi;
     }
 
@@ -69,6 +72,9 @@ public class ScanControllerSwagger
 	    ? e.getProperty("server.servlet.context-path")
 	    : "/";
 
+    /**
+     * Generate the core entry of the API
+     */
     public void scan() {
 	Map<String, Object> restControllerMap = applicationContext.getBeansWithAnnotation(RestController.class);
 	Swagger swagger = Swagger.initialize();
@@ -95,14 +101,14 @@ public class ScanControllerSwagger
 	    if (IGNORES.stream().anyMatch((key) -> restApi.getKey().equals(key))) {
 		continue;
 	    }
-	    outPath = Factory.pathFormat.apply(outPath);
+	    outPath = Utils.pathFormat.apply(outPath);
 	    // controller分组
 	    tags.add(new Swagger.Tag(restApi.getKey(), restApi.getKey()));
 	    // 循环所有的restfulApi
 	    Method[] restMethods = controllerClass.getDeclaredMethods();
 	    for (Method method : restMethods) {
-		DocApi api = paths.update(method, outPath, restApi.getKey());
-		RequestTypeMatchingSwagger.matching(api);
+		// 生成api入口
+		StrategySelector.matchAndGenerateApi(paths.update(method, outPath, restApi.getKey()));
 	    }
 	}
 	DefinitionsMap.get().setSwaggerJson(JSON.toJSONString(swagger));
@@ -114,56 +120,6 @@ public class ScanControllerSwagger
 	    importToYapi();
 	}
 
-    }
-
-    public boolean isAopProxy(Class<?> clazz) {
-	return clazz.getName().contains("$$");
-    }
-
-    public void print() {
-	log.info(DefinitionsMap.get().getSwaggerJson());
-    }
-
-    public boolean enableImport() {
-	return StringUtils.hasText(propertiesConfig.getHost()) && StringUtils.hasText(propertiesConfig.getToken());
-    }
-
-    public synchronized void importToYapi() {
-	yapiApi.importDoc(propertiesConfig.isCloud(), propertiesConfig.getToken(), propertiesConfig.getHost(),
-		DefinitionsMap.get().getSwaggerJson());
-	Factory.definitions.clear();
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-	this.applicationContext = applicationContext;
-    }
-
-    public String buildBaseUrl(Class<?> aClass) {
-	String basePath = "";
-	if (aClass.isAnnotationPresent(RequestMapping.class)) {
-	    RequestMapping annotation = aClass.getAnnotation(RequestMapping.class);
-	    if (annotation.value().length > 0) {
-		basePath = annotation.value()[0];
-	    }
-	}
-	return basePath;
-    }
-
-    @Override
-    public void setEnvironment(Environment environment) {
-	this.e = environment;
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-	if (propertiesConfig.isEnable()) {
-	    if (!propertiesConfig.isSwaggerNative()) {
-		printBanner();
-		scan();
-		log.info(" >>> YDoc Sync Api Successful !<<<");
-	    }
-	}
     }
 
     @Override
@@ -198,6 +154,66 @@ public class ScanControllerSwagger
     }
 
     /**
+     * is aop proxy class ?
+     *
+     * @see org.springframework.aop.support.AopUtils
+     * @param clazz proxy class
+     * @return boolean
+     */
+    public boolean isAopProxy(Class<?> clazz) {
+	return clazz.getName().contains("$$");
+    }
+
+    /**
+     * print banner
+     */
+    public void print() {
+	log.info(DefinitionsMap.get().getSwaggerJson());
+    }
+
+    public boolean enableImport() {
+	return StringUtils.hasText(propertiesConfig.getHost()) && StringUtils.hasText(propertiesConfig.getToken());
+    }
+
+    public synchronized void importToYapi() {
+	yapiApi.importDoc(propertiesConfig.isCloud(), propertiesConfig.getToken(), propertiesConfig.getHost(),
+		DefinitionsMap.get().getSwaggerJson());
+	Utils.definitions.clear();
+    }
+
+    public String buildBaseUrl(Class<?> aClass) {
+	String basePath = "";
+	if (aClass.isAnnotationPresent(RequestMapping.class)) {
+	    RequestMapping annotation = aClass.getAnnotation(RequestMapping.class);
+	    if (annotation.value().length > 0) {
+		basePath = annotation.value()[0];
+	    }
+	}
+	return basePath;
+    }
+
+    @Override
+    public void setEnvironment(Environment environment) {
+	this.e = environment;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+	this.applicationContext = applicationContext;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+	if (propertiesConfig.isEnable()) {
+	    if (!propertiesConfig.isSwaggerNative()) {
+		printBanner();
+		scan();
+		log.info(" >>> YDoc Sync Api Successful !<<<");
+	    }
+	}
+    }
+
+    /**
      * 某些方法必须login才ok
      */
     private boolean access() {
@@ -210,6 +226,7 @@ public class ScanControllerSwagger
 	System.out.println("( \\/ )(  _ \\(  _  )/ __)");
 	System.out.println(" \\  /  )(_) ))(_)(( (__ ");
 	System.out.println(" (__) (____/(_____)\\___)");
-	System.out.println("                v1.1.6.final   ");
+	System.out.println("                v" + Core.getVersion() + "   ");
+
     }
 }

@@ -4,7 +4,6 @@ import com.github.ydoc.anno.None;
 import com.github.ydoc.anno.ParamDesc;
 import com.github.ydoc.core.consts.Constans;
 import com.github.ydoc.core.Core;
-import com.github.ydoc.core.handler.Middleware;
 import com.github.ydoc.core.kv.Kv;
 import com.github.ydoc.core.kv.KvFactory;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -20,10 +19,10 @@ import java.util.Objects;
  * 
  * @author yujian
  **/
-public class NoneAnnoMiddleware implements Middleware<None> {
+public class NoneMiddleware extends AbstractMiddleware<None> {
 
     @Override
-    public void doHandle(List<Kv> target, Parameter parameter, None none) {
+    public void doHandle(List<Kv> target, Parameter parameter) {
 	if (parameter.getDeclaredAnnotations().length > 1) {
 	    return;
 	}
@@ -46,6 +45,11 @@ public class NoneAnnoMiddleware implements Middleware<None> {
 			Core.convertType(field.getType().getSimpleName())));
 	    }
 	}
+    }
+
+    @Override
+    public int getOrder() {
+	return 1;
     }
 
 }
