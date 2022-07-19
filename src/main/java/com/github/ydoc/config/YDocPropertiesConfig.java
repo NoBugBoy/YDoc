@@ -15,6 +15,11 @@ public class YDocPropertiesConfig {
      * yapi中创建项目的的token
      */
     private String token;
+
+    /**
+     * 开启ydoc增强功能
+     */
+    private boolean boost;
     /**
      * yapi服务url
      */

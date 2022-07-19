@@ -3,11 +3,13 @@ package com.github.ydoc.core;
 import com.alibaba.fastjson.JSON;
 import com.github.ydoc.config.YDocPropertiesConfig;
 import com.github.ydoc.config.YapiApi;
+import com.github.ydoc.core.consts.Constans;
 import com.github.ydoc.core.kv.DocApi;
 import com.github.ydoc.core.store.DefinitionsMap;
 import com.github.ydoc.core.swagger.Swagger;
 import com.github.ydoc.core.yapi.YapiAccess;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.bcel.Const;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
@@ -38,8 +40,7 @@ import java.util.function.Supplier;
  **/
 @EnableConfigurationProperties(YDocPropertiesConfig.class)
 @Slf4j
-public class ScanApi
-	implements ApplicationContextAware, EnvironmentAware, InitializingBean, CommandLineRunner {
+public class ScanApi implements ApplicationContextAware, EnvironmentAware, InitializingBean, CommandLineRunner {
     private final YapiApi yapiApi;
 
     public ScanApi(YapiApi yapiApi) {
@@ -78,12 +79,11 @@ public class ScanApi
     public void scan() {
 	Map<String, Object> restControllerMap = applicationContext.getBeansWithAnnotation(RestController.class);
 	Swagger swagger = Swagger.initialize();
-	swagger.setDefinitions(DefinitionsMap.get());
+	swagger.setBoost(propertiesConfig.isBoost());
 	swagger.setBasePath(basePath.get());
 	List<Swagger.Tag> tags = new ArrayList<>();
 	swagger.setTags(tags);
 	DocApi paths = DocApi.DOC_API;
-	swagger.setPaths(paths);
 	// 配置固定headers
 	paths.setHeaders(propertiesConfig.getHeaders());
 	for (Map.Entry<String, Object> restApi : restControllerMap.entrySet()) {
@@ -95,7 +95,7 @@ public class ScanApi
 
 	    // 如果有外层路径需要加上
 	    String outPath = buildBaseUrl(controllerClass);
-	    if ("/swagger-json".equals(outPath) || outPath.contains("$")) {
+	    if ("/swagger-json".equals(outPath) || outPath.contains(Constans.Other.DOLLAR)) {
 		continue;
 	    }
 	    if (IGNORES.stream().anyMatch((key) -> restApi.getKey().equals(key))) {
@@ -127,7 +127,7 @@ public class ScanApi
 	if (propertiesConfig.isSwaggerNative() && documentationCache != null && map != null) {
 	    // 这里暂时只考虑一个group的时候，因为大多数情况都是只有一个default
 	    printBanner();
-	    if (documentationCache.all().values().size() > 0) {
+	    if (!documentationCache.all().values().isEmpty()) {
 		Documentation documentation = new ArrayList<>(documentationCache.all().values()).get(0);
 		io.swagger.models.Swagger swagger = this.map.mapDocumentation(documentation);
 		DefinitionsMap.get().setSwaggerJson(JSON.toJSONString(swagger));

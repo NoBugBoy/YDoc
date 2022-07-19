@@ -56,6 +56,10 @@ public abstract class AbstractStrategy<T extends Annotation, O extends JSONObjec
 	return Core.deepObject(json, declaredField, t);
     }
 
+    protected Kv deepObject(Kv json, Class<?> clazz) {
+	return Core.deepObject(json, clazz);
+    }
+
     /**
      * 解决如果不是包装类型不是java开头的问题
      *
@@ -136,6 +140,8 @@ public abstract class AbstractStrategy<T extends Annotation, O extends JSONObjec
 	    properties.put(returnType.getSimpleName(), jsonObject);
 	    schema.put("properties", properties);
 	} else {
+	    // 肯定是TM一个对象
+
 	    // 判断是不是泛型
 	    Type genericReturnType = method.getGenericReturnType();
 	    Type objectType = null;
@@ -147,6 +153,11 @@ public abstract class AbstractStrategy<T extends Annotation, O extends JSONObjec
 		}
 	    }
 	    Kv objectTypeJson = KvFactory.get().empty();
+
+	    Kv cc = KvFactory.get().empty();
+	    deepObject(cc, returnType);
+	    schema.put("$ref", cc.get("$ref"));
+
 	    for (Field declaredField : getAllFiled(returnType)) {
 		// 临时支持单泛型返回值 https://github.com/NoBugBoy/YDoc/issues/8
 		if (objectType != null && "Object".equals(declaredField.getType().getSimpleName())) {
@@ -155,8 +166,8 @@ public abstract class AbstractStrategy<T extends Annotation, O extends JSONObjec
 		} else {
 		    objectTypeJson.put(declaredField.getName(), deepObject(KvFactory.get().empty(), declaredField));
 		}
-
 	    }
+
 	    if (!returnType.getName().toLowerCase().contains("json")) {
 		Kv jsonObject = KvFactory.get().titleKv(returnType.getSimpleName(), objectTypeJson,
 			Constans.Type.OBJECT);

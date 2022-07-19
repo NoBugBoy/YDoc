@@ -3,6 +3,7 @@ package com.github.ydoc.core.swagger;
 import com.github.ydoc.core.Core;
 import com.github.ydoc.core.kv.DocApi;
 import com.github.ydoc.core.kv.Kv;
+import com.github.ydoc.core.store.DefinitionsMap;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +21,7 @@ import java.util.List;
 @Setter
 public class Swagger {
     private String swagger;
+    private boolean boost;
     private Info info;
     private String basePath;
     private List<Tag> tags;
@@ -47,6 +49,8 @@ public class Swagger {
 
     public static Swagger initialize() {
 	Swagger swagger = new Swagger();
+	swagger.setDefinitions(DefinitionsMap.get());
+	swagger.setPaths(DocApi.DOC_API);
 	// help gc 只保留最后的json string对象就可以了
 	WeakReference<Swagger> weakReference = new WeakReference<>(swagger);
 	swagger.schemes = Collections.singletonList("http");

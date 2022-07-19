@@ -1,10 +1,10 @@
 package com.github.ydoc.core.kv;
 
-import com.github.ydoc.core.kv.Kv;
-
 import java.util.List;
 
 /**
+ * 生成固定结构的Kv工厂
+ * 
  * @author nobugboy
  **/
 public interface DynamicJsonFactory {

@@ -43,6 +43,7 @@ public class MiddlewareSelect {
 	    sortMiddleware.add(middleware);
 	}
 	sortMiddleware.sort(Comparator.comparing(Middleware::getOrder));
+	Collections.reverse(sortMiddleware);
 	sortMiddleware.get(FIRST).doHandle(target, parameter);
     }
 }

@@ -25,12 +25,15 @@ public class StrategySelector {
 	};
     }
 
+    @SuppressWarnings("unchecked")
     public static void matchAndGenerateApi(DocApi docApi) {
 	Annotation[] annotations = docApi.getMethod().getAnnotations();
-	for (Annotation annotation : annotations) {
-	    AbstractStrategy docApiAbstractStrategy = STRATEGY_MAP.get(Core.proxyToTargetClassName(annotation));
+	stop: for (Annotation annotation : annotations) {
+	    String key = Core.proxyToTargetClassName(annotation);
+	    AbstractStrategy docApiAbstractStrategy = STRATEGY_MAP.get(key);
 	    docApiAbstractStrategy.setProxy(annotation);
 	    docApiAbstractStrategy.generateApi(docApi);
+	    break stop;
 	}
     }
 

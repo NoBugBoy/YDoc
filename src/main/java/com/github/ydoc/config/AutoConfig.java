@@ -1,6 +1,7 @@
 package com.github.ydoc.config;
 
 import com.github.ydoc.core.ScanApi;
+import com.github.ydoc.plugin.mc.MethodChainAdvisor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -40,6 +41,12 @@ public class AutoConfig implements ApplicationContextAware {
     @ConditionalOnClass(EnableSwagger2.class)
     public SwaggerResourcesConfig swaggerResourcesConfig() {
 	return new SwaggerResourcesConfig();
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "ydoc", name = "boost", havingValue = "true")
+    public MethodChainAdvisor methodChainAdvisor() {
+	return new MethodChainAdvisor();
     }
 
     @Bean

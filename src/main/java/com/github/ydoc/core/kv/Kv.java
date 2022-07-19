@@ -31,8 +31,7 @@ public class Kv extends JSONObject implements Cloneable {
     }
 
     @Override
-    public Object clone() {
-
+    public Kv clone() {
 	return new Kv(
 		super.getInnerMap() instanceof LinkedHashMap ? new LinkedHashMap<String, Object>(super.getInnerMap())
 			: new HashMap<String, Object>(super.getInnerMap()));

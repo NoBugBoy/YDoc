@@ -19,6 +19,9 @@ import java.util.stream.Collectors;
  * @author nobugboy
  **/
 public class Core {
+    private Core() {
+    }
+
     /**
      * parse java enum to string
      * 
@@ -27,12 +30,12 @@ public class Core {
      * @return kv
      */
     private static Kv enumProcess(Kv json, Object[] enumValues) {
-	json.put("type", Constans.Type.INTEGER);
+	json.put(Constans.Key.TYPE, Constans.Type.INTEGER);
 	Set<String> jsonArray = new HashSet<>();
 	for (Object enumConstant : enumValues) {
 	    jsonArray.add(enumConstant.toString());
 	}
-	json.put("description", JSON.toJSONString(jsonArray));
+	json.put(Constans.Key.DESCRIPTION, JSON.toJSONString(jsonArray));
 	return json;
     }
 
@@ -45,13 +48,13 @@ public class Core {
     public static void bodyRequired(Kv parent, Kv properties) {
 	List<String> requireds = properties.keySet().stream().map(key -> {
 	    JSONObject booleanObject = properties.getJSONObject(key);
-	    Boolean r = booleanObject.getBoolean("required");
+	    Boolean r = booleanObject.getBoolean(Constans.Key.REQUIRED);
 	    if (r != null && r) {
 		return key;
 	    }
 	    return null;
 	}).filter(Objects::nonNull).collect(Collectors.toList());
-	parent.put("required", requireds);
+	parent.put(Constans.Key.REQUIRED, requireds);
     }
 
     /**
@@ -66,11 +69,11 @@ public class Core {
 	Type genericType = declaredField.getGenericType();
 	ParameterizedType pt = (ParameterizedType) genericType;
 	Class<?> actualTypeArgument = (Class<?>) pt.getActualTypeArguments()[0];
-	json.put("type", RequestBodyType.ARRAY.type);
+	json.put(Constans.Key.TYPE, RequestBodyType.ARRAY.type);
 	if (checkJavaType(actualTypeArgument.getTypeName())) {
 	    // 如果是普通类型
 	    Kv jsonObject = KvFactory.get().simple(convertType(actualTypeArgument.getTypeName()), desc);
-	    json.put("items", jsonObject);
+	    json.put(Constans.Key.ITEMS, jsonObject);
 	    return json;
 	} else {
 	    // 如果是对象
@@ -87,15 +90,39 @@ public class Core {
 		}
 
 	    }
-	    json.put("items", jsonObject);
+	    json.put(Constans.Key.ITEMS, jsonObject);
 	    Kv clone = (Kv) filedObject.clone();
 	    clone.remove(Constans.Other.REF);
 	    Kv innerRef = KvFactory.get().innerRef(clone, Constans.Type.OBJECT);
 	    bodyRequired(innerRef, clone);
 	    DefinitionsMap.get().putIfAbsent(actualTypeArgument.getSimpleName(), innerRef);
 	    jsonObject.putReference(actualTypeArgument.getName(), actualTypeArgument.getSimpleName());
-	    json.put("description", desc);
+	    json.put(Constans.Key.DESCRIPTION, desc);
 	}
+	return json;
+    }
+
+    public static Kv deepObject(Kv json, Class<?> declaringClass) {
+	if (RefSet.get().contains(declaringClass.getName())) {
+	    json.putReference(declaringClass.getName(), declaringClass.getSimpleName());
+	    return json;
+	}
+	RefSet.get().add(declaringClass.getName());
+	Kv objectTypeJson = KvFactory.get().empty();
+	for (Field field : getAllFiled(declaringClass)) {
+	    // final 禁序列化和 class不处理
+	    objectTypeJson.put(field.getName(), deepObject(KvFactory.get().empty(), field));
+	}
+	if (!declaringClass.getName().toLowerCase().contains("json")) {
+	    Kv jsonObject = KvFactory.get().titleKv(declaringClass.getSimpleName(), objectTypeJson,
+		    Constans.Type.OBJECT);
+	    bodyRequired(jsonObject, objectTypeJson);
+	    DefinitionsMap.get().putIfAbsent(declaringClass.getSimpleName(), jsonObject);
+	    json.putReference(declaringClass.getName(), declaringClass.getSimpleName());
+	} else {
+	    json.put(Constans.Key.PROPERTIES, objectTypeJson);
+	}
+	json.put(Constans.Key.DESCRIPTION, "");
 	return json;
     }
 
@@ -112,7 +139,7 @@ public class Core {
 	if (declaredField.isAnnotationPresent(ParamDesc.class)) {
 	    ParamDesc annotation = declaredField.getAnnotation(ParamDesc.class);
 	    desc = annotation.value();
-	    json.put("required", annotation.required());
+	    json.put(Constans.Key.REQUIRED, annotation.required());
 	}
 	if (declaredField.getType().isEnum()) {
 	    return enumProcess(json, declaredField.getType().getEnumConstants());
@@ -121,8 +148,8 @@ public class Core {
 	    return collectionProcess(json, declaredField, desc);
 	} else if (t.length == 0 && checkJavaType(declaredField.getType().getTypeName())) {
 	    // 常规类型
-	    json.put("type", convertType(declaredField.getType().getSimpleName()));
-	    json.put("description", desc);
+	    json.put(Constans.Key.TYPE, convertType(declaredField.getType().getSimpleName()));
+	    json.put(Constans.Key.DESCRIPTION, desc);
 	    return json;
 	} else {
 	    // 修复 https://github.com/NoBugBoy/YDoc/issues/1
@@ -142,21 +169,21 @@ public class Core {
 		return json;
 	    }
 	    RefSet.get().add(declaringClass.getName());
-	    Kv objectTypeJSON = KvFactory.get().empty();
+	    Kv objectTypeJson = KvFactory.get().empty();
 	    for (Field field : getAllFiled(declaringClass)) {
 		// final 禁序列化和 class不处理
-		objectTypeJSON.put(field.getName(), deepObject(KvFactory.get().empty(), field));
+		objectTypeJson.put(field.getName(), deepObject(KvFactory.get().empty(), field));
 	    }
 	    if (!declaringClass.getName().toLowerCase().contains("json")) {
-		Kv jsonObject = KvFactory.get().titleKv(declaringClass.getSimpleName(), objectTypeJSON,
+		Kv jsonObject = KvFactory.get().titleKv(declaringClass.getSimpleName(), objectTypeJson,
 			Constans.Type.OBJECT);
-		bodyRequired(jsonObject, objectTypeJSON);
+		bodyRequired(jsonObject, objectTypeJson);
 		DefinitionsMap.get().putIfAbsent(declaringClass.getSimpleName(), jsonObject);
 		json.putReference(declaringClass.getName(), declaringClass.getSimpleName());
 	    } else {
-		json.put("properties", objectTypeJSON);
+		json.put(Constans.Key.PROPERTIES, objectTypeJson);
 	    }
-	    json.put("description", desc);
+	    json.put(Constans.Key.DESCRIPTION, desc);
 	    return json;
 	}
 
@@ -185,7 +212,7 @@ public class Core {
 	default:
 	}
 	return false;
-    };
+    }
 
     /**
      * java type to swagger type
@@ -262,7 +289,7 @@ public class Core {
 	    h = proxy.getClass().getSuperclass().getDeclaredField("h");
 	    h.setAccessible(true);
 	    Object h_instance = h.get(proxy);
-	    Field type = h_instance.getClass().getDeclaredField("type");
+	    Field type = h_instance.getClass().getDeclaredField(Constans.Key.TYPE);
 	    type.setAccessible(true);
 	    Object type_instance = type.get(h_instance);
 	    Field name = type_instance.getClass().getDeclaredField("name");

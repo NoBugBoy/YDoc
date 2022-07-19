@@ -22,10 +22,10 @@ public class RefSet extends HashSet<String> {
     public void flushRef(Kv kv, String refName, String simpleName) {
 	if (!contains(refName)) {
 	    Kv empty = KvFactory.get().empty();
-	    empty.put("type", Constans.Type.OBJECT);
+	    empty.put(Constans.Key.TYPE, Constans.Type.OBJECT);
 	    empty.putReference(refName, simpleName);
 	    if (kv != null) {
-		kv.put("items", empty);
+		kv.put(Constans.Key.ITEMS, empty);
 	    }
 	    add(refName);
 	}

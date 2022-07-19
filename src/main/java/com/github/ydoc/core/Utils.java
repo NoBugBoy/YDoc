@@ -8,6 +8,10 @@ import java.util.function.Function;
  * @author nobugboy
  **/
 public class Utils {
+
+    private Utils() {
+    }
+
     public static String page;
     private static final String SED = "/";
 

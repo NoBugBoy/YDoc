@@ -19,4 +19,5 @@ public abstract class AbstractMiddleware<T extends Annotation> implements Middle
     public T getProxy() {
 	return proxy;
     }
+
 }

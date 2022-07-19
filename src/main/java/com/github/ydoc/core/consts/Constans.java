@@ -5,6 +5,15 @@ package com.github.ydoc.core.consts;
  **/
 public interface Constans {
 
+    interface Key {
+
+	String DESCRIPTION = "description";
+	String TYPE = "type";
+	String REQUIRED = "required";
+	String ITEMS = "items";
+	String PROPERTIES = "properties";
+    }
+
     interface In {
 	String HEADER = "header";
 	String QUERY = "query";
