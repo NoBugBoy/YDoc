@@ -61,11 +61,12 @@ public abstract class AbstractStrategy<T extends Annotation, O extends JSONObjec
     }
 
     /**
-     * 解决如果不是包装类型不是java开头的问题
-     *
+     * 解决如果不是包装类型不是java开头的问题 转移到了 Utils.isPrimitive
+     * 
      * @param name className
      * @return boolean
      */
+    @Deprecated
     protected boolean checkJavaType(String name) {
 	return Core.checkJavaType(name);
     }
@@ -93,13 +94,13 @@ public abstract class AbstractStrategy<T extends Annotation, O extends JSONObjec
 	if (Objects.nonNull(paramDesc = AnnotationUtils.getAnnotation(returnType, ParamDesc.class))) {
 	    desc = paramDesc.value();
 	}
-	if (returnType.equals(List.class) || returnType.equals(Set.class)) {
+	if (Collection.class.isAssignableFrom(returnType)) {
 	    schema.put("type", Constans.Type.ARRAY);
 	    Type genericReturnType = method.getGenericReturnType();
 	    ParameterizedType pt = (ParameterizedType) genericReturnType;
 	    Class<?> actualTypeArgument = (Class<?>) pt.getActualTypeArguments()[0];
 	    content.put("type", RequestBodyType.ARRAY.type);
-	    if (checkJavaType(actualTypeArgument.getTypeName())) {
+	    if (Utils.isPrimitive(actualTypeArgument)) {
 		// 如果是普通类型
 		schema.put("items", KvFactory.get().lv3ArrayItem(convertType(actualTypeArgument.getTypeName()), null));
 	    } else {
@@ -114,11 +115,11 @@ public abstract class AbstractStrategy<T extends Annotation, O extends JSONObjec
 			break;
 		    }
 		    if (actualTypeArgument.isAssignableFrom(field.getType())) {
-			// User 里有 list<User> 会死递归
+			// 对象中含有对象本身会死递归
 			break;
 		    } else {
 			// 对象嵌套
-			if (!checkJavaType(field.getType().getName())) {
+			if (!Utils.isPrimitive(field.getType())) {
 			    RefSet.get().flushRef(content, actualTypeArgument.getName(),
 				    actualTypeArgument.getSimpleName());
 			}
@@ -130,18 +131,16 @@ public abstract class AbstractStrategy<T extends Annotation, O extends JSONObjec
 		Kv clone = (Kv) filedObject.clone();
 		clone.remove(Constans.Other.REF);
 		Kv innerRef = KvFactory.get().innerRef(clone, Constans.Type.OBJECT);
-		DefinitionsMap.get().putIfAbsent(actualTypeArgument.getSimpleName(), innerRef);
+		DefinitionsMap.get().putIfAbsent(actualTypeArgument.getName(), innerRef);
 		objectKv.putReference(actualTypeArgument.getName(), actualTypeArgument.getSimpleName());
 		schema.put("description", desc);
 	    }
-	} else if (checkJavaType(returnType.getName())) {
+	} else if (Utils.isPrimitive(returnType)) {
 	    schema.put("type", convertType(returnType.getSimpleName()));
 	    Kv jsonObject = KvFactory.get().simple(RequestBodyType.of(returnType.getSimpleName()).type, desc);
 	    properties.put(returnType.getSimpleName(), jsonObject);
 	    schema.put("properties", properties);
 	} else {
-	    // 肯定是TM一个对象
-
 	    // 判断是不是泛型
 	    Type genericReturnType = method.getGenericReturnType();
 	    Type objectType = null;
@@ -161,6 +160,9 @@ public abstract class AbstractStrategy<T extends Annotation, O extends JSONObjec
 	    for (Field declaredField : getAllFiled(returnType)) {
 		// 临时支持单泛型返回值 https://github.com/NoBugBoy/YDoc/issues/8
 		if (objectType != null && "Object".equals(declaredField.getType().getSimpleName())) {
+		    objectTypeJson.put(declaredField.getName(),
+			    deepObject(KvFactory.get().empty(), declaredField, objectType));
+		} else if (objectType != null) {
 		    objectTypeJson.put(declaredField.getName(),
 			    deepObject(KvFactory.get().empty(), declaredField, objectType));
 		} else {

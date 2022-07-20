@@ -8,8 +8,27 @@ import java.util.function.Function;
  * @author nobugboy
  **/
 public class Utils {
+    private static final String JAVA = "java";
 
     private Utils() {
+    }
+
+    public static boolean isPrimitive(Class<?> clazz) {
+	if (null == clazz) {
+	    return false;
+	}
+	if (clazz.getName().startsWith(JAVA)) {
+	    return true;
+	}
+	if (clazz.isPrimitive() || String.class.isAssignableFrom(clazz)) {
+	    return true;
+	}
+	try {
+	    return ((Class<?>) clazz.getField("TYPE").get(null)).isPrimitive();
+	} catch (Exception e) {
+	    return false;
+	}
+
     }
 
     public static String page;
@@ -26,4 +45,8 @@ public class Utils {
 	}
 	return path;
     };
+
+    public static String kv(String desc) {
+	return desc + "(dynamic json K,V)";
+    }
 }

@@ -2,6 +2,7 @@ package com.github.ydoc.core.handler.middleware;
 
 import com.github.ydoc.anno.None;
 import com.github.ydoc.anno.ParamDesc;
+import com.github.ydoc.core.Utils;
 import com.github.ydoc.core.consts.Constans;
 import com.github.ydoc.core.Core;
 import com.github.ydoc.core.kv.Kv;
@@ -26,7 +27,7 @@ public class NoneMiddleware extends AbstractMiddleware<None> {
 	if (parameter.getDeclaredAnnotations().length > 1) {
 	    return;
 	}
-	if (!Core.checkJavaType(parameter.getParameterizedType().getTypeName())) {
+	if (!Utils.isPrimitive(parameter.getParameterizedType().getClass())) {
 	    for (Field field : Core.getAllFiled(parameter.getType())) {
 		String paramDesc;
 		boolean required;

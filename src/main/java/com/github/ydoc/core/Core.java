@@ -1,6 +1,7 @@
 package com.github.ydoc.core;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ydoc.anno.ParamDesc;
 import com.github.ydoc.core.consts.Constans;
@@ -8,6 +9,8 @@ import com.github.ydoc.core.kv.Kv;
 import com.github.ydoc.core.kv.KvFactory;
 import com.github.ydoc.core.store.DefinitionsMap;
 import com.github.ydoc.core.store.RefSet;
+import org.springframework.core.ResolvableType;
+import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -47,11 +50,16 @@ public class Core {
      */
     public static void bodyRequired(Kv parent, Kv properties) {
 	List<String> requireds = properties.keySet().stream().map(key -> {
-	    JSONObject booleanObject = properties.getJSONObject(key);
-	    Boolean r = booleanObject.getBoolean(Constans.Key.REQUIRED);
-	    if (r != null && r) {
-		return key;
+	    try {
+		JSONObject booleanObject = properties.getJSONObject(key);
+		Boolean r = booleanObject.getBoolean(Constans.Key.REQUIRED);
+		if (r != null && r) {
+		    return key;
+		}
+	    } catch (Exception e) {
+		// noop
 	    }
+
 	    return null;
 	}).filter(Objects::nonNull).collect(Collectors.toList());
 	parent.put(Constans.Key.REQUIRED, requireds);
@@ -60,17 +68,22 @@ public class Core {
     /**
      * parse collection
      * 
-     * @param json          target
-     * @param declaredField filed
-     * @param desc          description
+     * @param json        target
+     * @param genericType genericType
+     * @param desc        description
      * @return kv
      */
-    private static Kv collectionProcess(Kv json, Field declaredField, String desc) {
-	Type genericType = declaredField.getGenericType();
+    public static Kv collectionProcess(Kv json, Type genericType, String desc) {
 	ParameterizedType pt = (ParameterizedType) genericType;
-	Class<?> actualTypeArgument = (Class<?>) pt.getActualTypeArguments()[0];
+	Class<?> actualTypeArgument = null;
+	if (pt.getActualTypeArguments()[0] instanceof Class<?>) {
+	    actualTypeArgument = (Class<?>) pt.getActualTypeArguments()[0];
+	} else {
+	    return json;
+	}
+
 	json.put(Constans.Key.TYPE, RequestBodyType.ARRAY.type);
-	if (checkJavaType(actualTypeArgument.getTypeName())) {
+	if (Utils.isPrimitive(actualTypeArgument)) {
 	    // 如果是普通类型
 	    Kv jsonObject = KvFactory.get().simple(convertType(actualTypeArgument.getTypeName()), desc);
 	    json.put(Constans.Key.ITEMS, jsonObject);
@@ -103,8 +116,19 @@ public class Core {
     }
 
     public static Kv deepObject(Kv json, Class<?> declaringClass) {
+	String desc = declaringClass.getName();
+	if (declaringClass.isAnnotationPresent(ParamDesc.class)) {
+	    ParamDesc annotation = declaringClass.getAnnotation(ParamDesc.class);
+	    desc = annotation.value();
+	    json.put(Constans.Key.REQUIRED, annotation.required());
+	}
 	if (RefSet.get().contains(declaringClass.getName())) {
 	    json.putReference(declaringClass.getName(), declaringClass.getSimpleName());
+	    return json;
+	}
+	if (Utils.isPrimitive(declaringClass)) {
+	    json.put(Constans.Key.TYPE, convertType(declaringClass.getSimpleName()));
+	    json.put(Constans.Key.DESCRIPTION, desc);
 	    return json;
 	}
 	RefSet.get().add(declaringClass.getName());
@@ -122,7 +146,7 @@ public class Core {
 	} else {
 	    json.put(Constans.Key.PROPERTIES, objectTypeJson);
 	}
-	json.put(Constans.Key.DESCRIPTION, "");
+	json.put(Constans.Key.DESCRIPTION, desc);
 	return json;
     }
 
@@ -141,60 +165,86 @@ public class Core {
 	    desc = annotation.value();
 	    json.put(Constans.Key.REQUIRED, annotation.required());
 	}
+	// enum
 	if (declaredField.getType().isEnum()) {
 	    return enumProcess(json, declaredField.getType().getEnumConstants());
 	}
-	if (declaredField.getType().equals(List.class) || declaredField.getType().equals(Set.class)) {
-	    return collectionProcess(json, declaredField, desc);
-	} else if (t.length == 0 && checkJavaType(declaredField.getType().getTypeName())) {
+	// map
+	if (Map.class.isAssignableFrom(declaredField.getType())) {
+	    return mapProcess(json, declaredField, desc);
+	}
+
+	// collection
+	if ((t.length > 0 && (t[0].getTypeName().contains("List") || t[0].getTypeName().contains("Set")))
+		|| Collection.class.isAssignableFrom(declaredField.getType())) {
+	    return collectionProcess(json, t.length > 0 ? t[0] : declaredField.getGenericType(), desc);
+	}
+	// primitive
+	if (t.length == 0 && Utils.isPrimitive(declaredField.getType())) {
 	    // 常规类型
 	    json.put(Constans.Key.TYPE, convertType(declaredField.getType().getSimpleName()));
 	    json.put(Constans.Key.DESCRIPTION, desc);
 	    return json;
-	} else {
-	    // 修复 https://github.com/NoBugBoy/YDoc/issues/1
-	    Class<?> declaringClass = declaredField.getType();
-	    if (t.length > 0) {
-		if (t[0] instanceof ParameterizedType) {
-		    ParameterizedType pt = (ParameterizedType) t[0];
-		    declaringClass = (Class<?>) pt.getActualTypeArguments()[0];
-		} else if (t[0] instanceof Class<?>) {
-		    declaringClass = (Class<?>) t[0];
-		} else {
-		    declaringClass = typeToClass(t[0]);
-		}
-	    }
-	    if (RefSet.get().contains(declaringClass.getName())) {
-		json.putReference(declaringClass.getName(), declaringClass.getSimpleName());
-		return json;
-	    }
-	    RefSet.get().add(declaringClass.getName());
-	    Kv objectTypeJson = KvFactory.get().empty();
-	    for (Field field : getAllFiled(declaringClass)) {
-		// final 禁序列化和 class不处理
-		objectTypeJson.put(field.getName(), deepObject(KvFactory.get().empty(), field));
-	    }
-	    if (!declaringClass.getName().toLowerCase().contains("json")) {
-		Kv jsonObject = KvFactory.get().titleKv(declaringClass.getSimpleName(), objectTypeJson,
-			Constans.Type.OBJECT);
-		bodyRequired(jsonObject, objectTypeJson);
-		DefinitionsMap.get().putIfAbsent(declaringClass.getSimpleName(), jsonObject);
-		json.putReference(declaringClass.getName(), declaringClass.getSimpleName());
+	}
+	// object
+	// 修复 https://github.com/NoBugBoy/YDoc/issues/1
+	Class<?> declaringClass = declaredField.getType();
+	if (t.length > 0) {
+	    if (t[0] instanceof ParameterizedType) {
+		ParameterizedType pt = (ParameterizedType) t[0];
+		declaringClass = (Class<?>) pt.getActualTypeArguments()[0];
+	    } else if (t[0] instanceof Class<?>) {
+		declaringClass = (Class<?>) t[0];
 	    } else {
-		json.put(Constans.Key.PROPERTIES, objectTypeJson);
+		declaringClass = typeToClass(t[0]);
 	    }
-	    json.put(Constans.Key.DESCRIPTION, desc);
+	}
+	if (RefSet.get().contains(declaringClass.getName())) {
+	    json.putReference(declaringClass.getName(), declaringClass.getSimpleName());
 	    return json;
 	}
+	RefSet.get().add(declaringClass.getName());
+
+	Kv objectTypeJson = KvFactory.get().empty();
+	for (Field field : getAllFiled(declaringClass)) {
+	    // final 禁序列化和 class不处理
+	    objectTypeJson.put(field.getName(), deepObject(KvFactory.get().empty(), field));
+	}
+	if (!declaringClass.getName().toLowerCase().contains("json")) {
+	    Kv jsonObject = KvFactory.get().titleKv(declaringClass.getSimpleName(), objectTypeJson,
+		    Constans.Type.OBJECT);
+	    bodyRequired(jsonObject, objectTypeJson);
+	    DefinitionsMap.get().putIfAbsent(declaringClass.getName(), jsonObject);
+	    json.putReference(declaringClass.getName(), declaringClass.getSimpleName());
+	} else {
+	    json.put(Constans.Key.PROPERTIES, objectTypeJson);
+	}
+	json.put(Constans.Key.DESCRIPTION, desc);
+	return json;
 
     }
 
     /**
-     * 解决如果不是包装类型不是java开头的问题
-     *
+     * map
+     * 
+     * @param json          kv
+     * @param declaredField field
+     * @param desc          desc
+     * @return kv
+     */
+    private static Kv mapProcess(Kv json, Field declaredField, String desc) {
+	json.put(Constans.Key.TYPE, RequestBodyType.OBJECT.type);
+	json.put(Constans.Key.DESCRIPTION, Utils.kv(desc));
+	return json;
+    }
+
+    /**
+     * 解决如果不是包装类型不是java开头的问题 转移到了 Utils.isPrimitive
+     * 
      * @param name className
      * @return boolean
      */
+    @Deprecated
     public static boolean checkJavaType(String name) {
 	if (name.startsWith("java")) {
 	    return true;
