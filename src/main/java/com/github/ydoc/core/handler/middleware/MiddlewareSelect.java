@@ -44,6 +44,9 @@ public class MiddlewareSelect {
 	}
 	sortMiddleware.sort(Comparator.comparing(Middleware::getOrder));
 	Collections.reverse(sortMiddleware);
-	sortMiddleware.get(FIRST).doHandle(target, parameter);
+	if (!sortMiddleware.isEmpty()) {
+	    sortMiddleware.get(FIRST).doHandle(target, parameter);
+	}
+
     }
 }
