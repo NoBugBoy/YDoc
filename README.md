@@ -3,9 +3,8 @@
 # 使用过程出现问题，可以提一个issues描述一下，看到后会更正。
 
 
-### 1.1.5版本需要配置  ydoc.headers= 这是个bug，下个版本会修复
 
-使用Springboot 2.6.* 的朋友需要在配置文件新增一条参数
+使用Springboot 2.6.* + 的朋友需要在配置文件新增一条参数
 ```
 spring.mvc.pathmatch.matching-strategy=ant_path_matcher
 ```
@@ -82,16 +81,17 @@ Ydoc是一款基于spring-boot-starter的依赖库，轻量级，不依赖注释
 10. 1.1.0修复返回值泛型被覆盖的问题 https://github.com/NoBugBoy/YDoc/issues/12
 11. 1.1.1修复返回值R<List<T>>解析失败的问题&深层嵌套解析内部属性失败&修复返回值List<T>解析错误
 12. 1.1.2新增通用公共headers配置，和解析@RequestHeader注解
-12. 1.1.3修复不配置headers会空指针问题，和参数必填显示为false等问题
-13. 1.1.4修复requestbody对象内参数使用ParamDesc的required修饰时没有正确的显示在文档上
-13. 1.1.5修复代理类无法被正常生成api的问题&代码重构
-13. 1.1.6修复1.1.5的bug
+13. 1.1.3修复不配置headers会空指针问题，和参数必填显示为false等问题
+14. 1.1.4修复requestbody对象内参数使用ParamDesc的required修饰时没有正确的显示在文档上
+15. 1.1.5修复代理类无法被正常生成api的问题&代码重构
+16. 1.1.6修复1.1.5的bug
+17. 1.1.7修复简单返回值无法显示问题，支持map、list优化部分逻辑
 
 ```xml 
        <dependency>
             <groupId>com.github.nobugboy</groupId>
             <artifactId>ydoc-spring-boot-starter</artifactId>
-            <version>1.1.6</version>
+            <version>1.1.7</version>
         </dependency>
 ```
 
